@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pegasustan", "Pegasustan\Pegasustan.csproj", "{CE9BAE6F-537B-4E79-9C66-A754D003E228}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pegasustan.Tests", "Pegasustan.Tests\Pegasustan.Tests.csproj", "{60A080FA-AFA2-48BD-BC07-CAFEE429987E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CE9BAE6F-537B-4E79-9C66-A754D003E228}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE9BAE6F-537B-4E79-9C66-A754D003E228}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE9BAE6F-537B-4E79-9C66-A754D003E228}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE9BAE6F-537B-4E79-9C66-A754D003E228}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60A080FA-AFA2-48BD-BC07-CAFEE429987E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60A080FA-AFA2-48BD-BC07-CAFEE429987E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60A080FA-AFA2-48BD-BC07-CAFEE429987E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60A080FA-AFA2-48BD-BC07-CAFEE429987E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

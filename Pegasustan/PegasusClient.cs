@@ -1,0 +1,189 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Threading.Tasks;
+using Pegasustan.Domain;
+
+namespace Pegasustan
+{
+    public class PegasusClient
+    {
+        // www.flypgs.com API
+        protected const string BaseApiAddress = "https://www.flypgs.com/";
+        protected const string DepartureCountryPortsEndpoint = "portmatrix/departure";
+        protected const string ArrivalCountryPortsEndpoint = "portmatrix/arrival";
+        protected const string FaresEndpoint = "apint/cheapfare/flight-calender-prices";
+        
+        // web.flypgs.com API
+        protected const string BaseWebApiAddress = "https://web.flypgs.com/pegasus/";
+        protected const string LanguagesEndpoint = "common/languages";
+
+        // JSON nodes
+        protected const string LanguagesNode = "languageList";
+        protected const string CountriesNode = "data";
+        protected const string FaresMonthsNode = "cheapFareFlightCalenderModelList"; // Yes, there is a typo in the API
+        
+        // Query parameters
+        protected const string LanguageQueryParameter = "lang";
+        protected const string DepartureCodeQueryParameter = "depCode";
+
+        protected readonly HttpClient Client = new HttpClient(new HttpClientHandler
+        {
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.None
+        });
+
+        /// <summary>
+        /// The available API result languages. 
+        /// </summary>
+        public Language[] Languages { get; protected set; } = Array.Empty<Language>();
+        
+        /// <summary>
+        /// The default API result language.
+        /// <remarks>It should get initialized by default to the English language when <c>InitializeAsync</c> is called. Then it can be changed to an other language.</remarks>
+        /// </summary>
+        public Language DefaultLanguage { get; set; }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="T:Pegasustan.PegasusClient" /> class.
+        /// </summary>
+        public PegasusClient()
+        {
+            Client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0");
+            Client.DefaultRequestHeaders.TryAddWithoutValidation("X-Platform", "web");
+            Client.DefaultRequestHeaders.Accept.ParseAdd("*/*");
+        }
+        
+        /// <summary>
+        /// Initializes the <see cref="T:Pegasustan.PegasusClient" /> asynchronously.
+        /// <remarks>The available API result languages are fetched and saved in the <c>Languages</c> property.</remarks>
+        /// </summary>
+        public async Task InitializeAsync()
+        {
+            Languages = await FetchLanguagesAsync();
+            DefaultLanguage = Languages.Single(lang => lang.Code.Equals("en", StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Fetches available API result languages.
+        /// </summary>
+        /// <returns>An array of available API result languages.</returns>
+        public async Task<Language[]> FetchLanguagesAsync()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{LanguagesEndpoint}");
+            // Web API for some reason requires 'Content-Type: application/json' in a GET request
+            // As a solution an empty JSON is passed, setting a request header manually does not work
+            request.Content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+            
+            var response = await Client.SendAsync(request);
+            
+            using (var stream = await response.Content.ReadAsStreamAsync())
+            {
+                var content = await JsonSerializer.DeserializeAsync<JsonObject>(stream);
+                return ParseLanguages(content);
+            }
+        }
+        
+        /// <summary>
+        /// Fetches departure countries.
+        /// </summary>
+        /// <returns>An array of departure countries.</returns>
+        public async Task<Country[]> FetchDepartureCountriesAsync()
+        {
+            var query = await ParamsToStringAsync(new Dictionary<string, string>
+            {
+                [LanguageQueryParameter] = DefaultLanguage.Code 
+            });
+
+            var response = await Client.GetAsync($"{BaseApiAddress}{DepartureCountryPortsEndpoint}?{query}");
+            
+            using (var jsonStream = await response.Content.ReadAsStreamAsync())
+            {
+                var content = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
+                return ParseCountries(content);
+            }
+        }
+        
+        /// <summary>
+        /// Fetches arrival countries based on the provided departure port.
+        /// </summary>
+        /// <param name="departurePort">The port from which the flight begins.</param>
+        /// <returns>An array of possible arrival countries.</returns>
+        public async Task<Country[]> FetchArrivalCountriesAsync(Port departurePort)
+        {
+            var query = await ParamsToStringAsync(new Dictionary<string, string>
+            {
+                [LanguageQueryParameter] = DefaultLanguage.Code,
+                [DepartureCodeQueryParameter] = departurePort.Code
+            });
+
+            var response = await Client.GetAsync($"{BaseApiAddress}{ArrivalCountryPortsEndpoint}?{query}");
+            
+            using (var jsonStream = await response.Content.ReadAsStreamAsync())
+            {
+                var content = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
+                return ParseCountries(content);
+            }
+        }
+        
+        /// <summary>
+        /// Fetches fares months for the given route and currency.
+        /// </summary>
+        /// <param name="departurePort">The port from which the flight begins.</param>
+        /// <param name="arrivalPort">The port at which the flight ends.</param>
+        /// <param name="flightDate">The date from which the fares months should be counted.</param>
+        /// <param name="currency">The currency in which the fares should be presented.</param>
+        /// <returns>An array of fares months.</returns>
+        public async Task<FaresMonth[]> FetchFaresMonthsAsync(Port departurePort, Port arrivalPort, DateTime flightDate, Currency currency)
+        {
+            var payload = new
+            {
+                depPort = departurePort.Code,
+                arrPort = arrivalPort.Code,
+                flightDate = flightDate.ToString("yyyy-MM-dd"),
+                currency = currency.Code
+            };
+            
+            var jsonPayload = JsonSerializer.Serialize(payload);
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+            var response = await Client.PostAsync($"{BaseApiAddress}{FaresEndpoint}", content);
+            response.EnsureSuccessStatusCode();
+            
+            using (var jsonStream = await response.Content.ReadAsStreamAsync())
+            {
+                var responseContent = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
+                return ParseFaresMonths(responseContent);
+            }
+        }
+
+        protected static Language[] ParseLanguages(JsonObject jsonObject)
+        {
+            var languagesNode = jsonObject[LanguagesNode].AsArray();
+            return languagesNode.Select(Language.Parse).ToArray();
+        }
+        
+        protected static Country[] ParseCountries(JsonObject jsonObject)
+        {
+            var countriesNode = jsonObject[CountriesNode].AsArray();
+            return countriesNode.Select(Country.Parse).ToArray();
+        }
+
+        protected static FaresMonth[] ParseFaresMonths(JsonObject jsonObject)
+        {
+            var faresMonthsNode = jsonObject[FaresMonthsNode].AsArray();
+            return faresMonthsNode.Select(FaresMonth.Parse).ToArray();
+        }
+
+        protected static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)
+        {
+            using (HttpContent content = new FormUrlEncodedContent(urlParams))
+            {
+                return await content.ReadAsStringAsync();
+            }
+        }
+    }
+}
