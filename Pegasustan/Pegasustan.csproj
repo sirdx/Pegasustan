@@ -2,10 +2,25 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>Pegasustan</Title>
+        <Authors>sirdx</Authors>
+        <Description>Pegasus API written in .NET Standard 2.0.</Description>
+        <PackageProjectUrl>https://github.com/sirdx/Pegasustan</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/sirdx/Pegasustan/blob/master/LICENSE.txt</PackageLicenseUrl>
+        <PackageIcon>icon.png</PackageIcon>
+        <RepositoryUrl>https://github.com/sirdx/Pegasustan.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>pegasus api</PackageTags>
+        <PackageReleaseNotes>First Pegasustan release.</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="System.Text.Json" Version="8.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="icon.png" Pack="true" PackagePath=""/>
     </ItemGroup>
 
 </Project>
