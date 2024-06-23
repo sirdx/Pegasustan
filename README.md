@@ -6,8 +6,7 @@
 It provides a simple way to fetch ticket fares for a specified route. More functionality perhaps will be added later.
 
 ## Installation
-Pegasustan **will be** available on [NuGet](https://www.nuget.org/packages/Pegasustan).<br/>
-For the moment a few more things are needed to publish the first build.
+Pegasustan is available on [NuGet](https://www.nuget.org/packages/Pegasustan).
 
 ## Basic usage
 The following code demonstrates basic usage of Pegasustan.
@@ -39,7 +38,8 @@ FaresMonth[] faresMonths = await client.FetchFaresMonthsAsync(ankaraPort, berlin
 This project is in no way affiliated with Pegasus Airlines. This is just a hobby project created for fun.
 
 ## Contributing
-There is a lot of to discover and add.<br/>
+There is a lot of to discover and add.
+
 I really welcome community pull requests for bug fixes, enhancements, and documentation.
 
 ## License
