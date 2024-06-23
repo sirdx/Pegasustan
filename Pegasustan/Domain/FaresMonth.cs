@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text.Json.Nodes;
 using Pegasustan.Utils;
 
@@ -7,17 +8,17 @@ namespace Pegasustan.Domain
     /// <summary>
     /// Represents a fares month within Pegasus API.
     /// </summary>
-    public struct FaresMonth
+    public class FaresMonth
     {
         /// <summary>
-        /// The departure port code.
+        /// The departure port.
         /// </summary>
-        public string DeparturePortCode { get; }
+        public Port DeparturePort { get; }
         
         /// <summary>
-        /// The arrival port code.
+        /// The arrival port.
         /// </summary>
-        public string ArrivalPortCode { get; }
+        public Port ArrivalPort { get; }
         
         /// <summary>
         /// The year and the month.
@@ -30,16 +31,16 @@ namespace Pegasustan.Domain
         public Flight[] Flights { get; }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="T:Pegasustan.Domain.FaresMonth" /> struct.
+        /// Creates a new instance of the <see cref="T:Pegasustan.Domain.FaresMonth" /> class.
         /// </summary>
-        /// <param name="departurePortCode">The departure port code.</param>
-        /// <param name="arrivalPortCode">The arrival port code.</param>
+        /// <param name="departurePort">The departure port.</param>
+        /// <param name="arrivalPort">The arrival port.</param>
         /// <param name="yearMonth">The year and the month.</param>
         /// <param name="flights">The flights.</param>
-        private FaresMonth(string departurePortCode, string arrivalPortCode, YearMonth yearMonth, Flight[] flights)
+        private FaresMonth(Port departurePort, Port arrivalPort, YearMonth yearMonth, Flight[] flights)
         {
-            DeparturePortCode = departurePortCode;
-            ArrivalPortCode = arrivalPortCode;
+            DeparturePort = departurePort;
+            ArrivalPort = arrivalPort;
             YearMonth = yearMonth;
             Flights = flights;
         }
@@ -48,20 +49,35 @@ namespace Pegasustan.Domain
         /// Converts the <see cref="T:System.Text.Json.Nodes.JsonNode"/> representation of a fares month to its <see cref="T:Pegasustan.Domain.FaresMonth"/> equivalent.
         /// </summary>
         /// <param name="node">A JSON node that contains a fares month data to convert.</param>
+        /// <param name="departurePort">The departure port.</param>
+        /// <param name="arrivalPort">The arrival port.</param>
+        /// <param name="currency">The currency in which the fares are provided.</param>
         /// <returns>An object that is equivalent to the fares month data contained in <paramref name="node"/>.</returns>
-        public static FaresMonth Parse(JsonNode node)
+        /// <exception cref="ArgumentException">Passed JSON node does not represent a valid fares month data.</exception>
+        public static FaresMonth Parse(JsonNode node, Port departurePort, Port arrivalPort, Currency currency)
         {
             var departurePortCode = (string)node["depPort"];
             var arrivalPortCode = (string)node["arrPort"];
-            var yearMonth = YearMonth.Parse((string)node["month"]);
+            YearMonth.TryParse((string)node["month"] ?? string.Empty, out var yearMonth);
             
-            var flightsNode = node["days"].AsArray();
+            if (departurePortCode is null || arrivalPortCode is null || yearMonth is null)
+            {
+                throw new ArgumentException("JSON node does not provide proper fares month data.");
+            }
+            
+            var flightsNode = node["days"]?.AsArray();
+
+            if (flightsNode is null)
+            {
+                throw new ArgumentException("JSON node does not provide proper fares month data.");
+            }
+            
             var flights = flightsNode
-                .Select(Flight.Parse)
+                .Select(flightNode => Flight.Parse(flightNode, currency))
                 .Where(f => !f.Equals(Flight.NoFlight))
                 .ToArray();
 
-            var faresMonth = new FaresMonth(departurePortCode, arrivalPortCode, yearMonth, flights);
+            var faresMonth = new FaresMonth(departurePort, arrivalPort, yearMonth, flights);
             return faresMonth;
         }
     }

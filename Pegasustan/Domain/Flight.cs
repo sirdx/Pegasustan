@@ -6,7 +6,7 @@ namespace Pegasustan.Domain
     /// <summary>
     /// Represents a flight within Pegasus API.
     /// </summary>
-    public struct Flight
+    public class Flight
     {
         /// <summary>
         /// The "no flight" object.
@@ -32,31 +32,41 @@ namespace Pegasustan.Domain
         public decimal Amount { get; }
         
         /// <summary>
-        /// The flight fare currency code.
+        /// The flight fare currency.
         /// </summary>
-        public string CurrencyCode { get; }
+        public Currency Currency { get; }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="T:Pegasustan.Domain.Flight" /> struct.
+        /// Creates a new empty instance of the <see cref="T:Pegasustan.Domain.Flight" /> class.
+        /// </summary>
+        private Flight()
+        {
+            
+        }
+        
+        /// <summary>
+        /// Creates a new instance of the <see cref="T:Pegasustan.Domain.Flight" /> class.
         /// </summary>
         /// <param name="date">The flight date.</param>
         /// <param name="campaignFare">Is the flight fare campaign.</param>
         /// <param name="amount">The flight fare amount.</param>
-        /// <param name="currencyCode">The flight fare currency code.</param>
-        private Flight(DateTime date, bool campaignFare, decimal amount, string currencyCode)
+        /// <param name="currency">The flight fare currency.</param>
+        private Flight(DateTime date, bool campaignFare, decimal amount, Currency currency)
         {
             Date = date;
             CampaignFare = campaignFare;
             Amount = amount;
-            CurrencyCode = currencyCode;
+            Currency = currency;
         }
-        
+
         /// <summary>
         /// Converts the <see cref="T:System.Text.Json.Nodes.JsonNode"/> representation of a flight to its <see cref="T:Pegasustan.Domain.Flight"/> equivalent.
         /// </summary>
         /// <param name="node">A JSON node that contains a flight data to convert.</param>
+        /// <param name="currency">The currency in which the fare is provided.</param>
         /// <returns>An object that is equivalent to the flight data contained in <paramref name="node"/>.</returns>
-        public static Flight Parse(JsonNode node)
+        /// <exception cref="ArgumentException">Passed JSON node does not represent a valid flight data.</exception>
+        public static Flight Parse(JsonNode node, Currency currency)
         {
             var flightMessage = node["availFlightMessage"];
                     
@@ -65,14 +75,24 @@ namespace Pegasustan.Domain
                 return NoFlight;
             }
                     
-            var date = DateTime.Parse((string)node["flightDate"]);
+            DateTime.TryParse((string)node["flightDate"] ?? string.Empty, out var date);
             var campaignFare = (bool)node["campaignFare"];
-            
             var cheapFareNode = node["cheapFare"];
+
+            if (cheapFareNode is null || date == DateTime.MinValue)
+            {
+                throw new ArgumentException("JSON node does not provide proper flight data.");
+            }
+            
             var amount = (decimal)cheapFareNode["amount"];
             var currencyCode = (string)cheapFareNode["currency"];
+            
+            if (currencyCode is null)
+            {
+                throw new ArgumentException("JSON node does not provide proper flight data.");
+            }
 
-            var flight = new Flight(date, campaignFare, amount, currencyCode);
+            var flight = new Flight(date, campaignFare, amount, currency);
             return flight;
         }
     }

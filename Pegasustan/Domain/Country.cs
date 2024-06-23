@@ -7,7 +7,7 @@ namespace Pegasustan.Domain
     /// <summary>
     /// Represents a country within Pegasus API.
     /// </summary>
-    public struct Country
+    public class Country
     {
         /// <summary>
         /// The country GUID.
@@ -32,7 +32,7 @@ namespace Pegasustan.Domain
         /// <summary>
         /// The country ports.
         /// </summary>
-        public Port[] Ports { get; }
+        public Port[] Ports { get; private set; }
         
         /// <summary>
         /// The country entry creation date.
@@ -45,7 +45,7 @@ namespace Pegasustan.Domain
         public DateTime ModifiedAt { get; }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="T:Pegasustan.Domain.Country" /> struct.
+        /// Creates a new instance of the <see cref="T:Pegasustan.Domain.Country" /> class.
         /// </summary>
         /// <param name="id">The country GUID.</param>
         /// <param name="languageId">The data language GUID.</param>
@@ -70,19 +70,31 @@ namespace Pegasustan.Domain
         /// </summary>
         /// <param name="node">A JSON node that contains a country data to convert.</param>
         /// <returns>An object that is equivalent to the country data contained in <paramref name="node"/>.</returns>
+        /// <exception cref="ArgumentException">Passed JSON node does not represent a valid country data.</exception>
         public static Country Parse(JsonNode node)
         {
-            var id = Guid.Parse((string)node["id"]);
-            var languageId = Guid.Parse((string)node["languageId"]);
+            Guid.TryParse((string)node["id"] ?? string.Empty, out var id);
+            Guid.TryParse((string)node["languageId"] ?? string.Empty, out var languageId);
             var name = (string)node["countryName"];
             var code = (string)node["countryCode"];
-            var createdAt = DateTime.Parse((string)node["createdDate"]);
-            var modifiedAt = DateTime.Parse((string)node["modifiedDate"]);
+            DateTime.TryParse((string)node["createdDate"] ?? string.Empty, out var createdAt);
+            DateTime.TryParse((string)node["modifiedDate"] ?? string.Empty, out var modifiedAt);
+            
+            if (id == Guid.Empty || languageId == Guid.Empty || name is null || code is null || createdAt == DateTime.MinValue || modifiedAt == DateTime.MinValue)
+            {
+                throw new ArgumentException("JSON node does not provide proper country data.");
+            }
 
-            var portsNode = node["portMatrixPorts"].AsArray();
-            var ports = portsNode.Select(Port.Parse).ToArray();
+            var country = new Country(id, languageId, name, code, Array.Empty<Port>(), createdAt, modifiedAt);
+            var portsNode = node["portMatrixPorts"]?.AsArray();
 
-            var country = new Country(id, languageId, name, code, ports, createdAt, modifiedAt);
+            if (portsNode is null)
+            {
+                throw new ArgumentException("JSON node does not provide proper country data.");
+            }
+            
+            var ports = portsNode.Select(portNode => Port.Parse(portNode, country)).ToArray();
+            country.Ports = ports;
             return country;
         }
     }

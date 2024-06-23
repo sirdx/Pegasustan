@@ -156,7 +156,7 @@ namespace Pegasustan
             using (var jsonStream = await response.Content.ReadAsStreamAsync())
             {
                 var responseContent = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
-                return ParseFaresMonths(responseContent);
+                return ParseFaresMonths(responseContent, departurePort, arrivalPort, currency);
             }
         }
 
@@ -172,10 +172,10 @@ namespace Pegasustan
             return countriesNode.Select(Country.Parse).ToArray();
         }
 
-        protected static FaresMonth[] ParseFaresMonths(JsonObject jsonObject)
+        protected static FaresMonth[] ParseFaresMonths(JsonObject jsonObject, Port departurePort, Port arrivalPort, Currency currency)
         {
             var faresMonthsNode = jsonObject[FaresMonthsNode].AsArray();
-            return faresMonthsNode.Select(FaresMonth.Parse).ToArray();
+            return faresMonthsNode.Select(node => FaresMonth.Parse(node, departurePort, arrivalPort, currency)).ToArray();
         }
 
         protected static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)

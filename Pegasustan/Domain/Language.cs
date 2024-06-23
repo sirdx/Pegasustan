@@ -6,7 +6,7 @@ namespace Pegasustan.Domain
     /// <summary>
     /// Represents a language compatible with Pegasus API.
     /// </summary>
-    public struct Language
+    public class Language
     {
         /// <summary>
         /// The language code.
@@ -19,7 +19,7 @@ namespace Pegasustan.Domain
         public string Name { get; }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="T:Pegasustan.Domain.Language" /> struct.
+        /// Creates a new instance of the <see cref="T:Pegasustan.Domain.Language" /> class.
         /// </summary>
         /// <param name="code">The language code.</param>
         /// <param name="name">The language name.</param>
@@ -42,7 +42,7 @@ namespace Pegasustan.Domain
 
             if (code is null || name is null)
             {
-                throw new ArgumentException("JSON node does not provide proper language data");
+                throw new ArgumentException("JSON node does not provide proper language data.");
             }
 
             var language = new Language(code, name);

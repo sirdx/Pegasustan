@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents a currency compatible with Pegasus API.
     /// </summary>
-    public struct Currency
+    public class Currency
     {
         /// <summary>
         /// Turkish lira (TRY).
@@ -36,7 +36,7 @@
         public char Symbol { get; }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="T:Pegasustan.Domain.Currency" /> struct.
+        /// Creates a new instance of the <see cref="T:Pegasustan.Domain.Currency" /> class.
         /// </summary>
         /// <param name="code">The currency code.</param>
         /// <param name="symbol">The currency symbol.</param>

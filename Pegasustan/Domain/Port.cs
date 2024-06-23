@@ -7,23 +7,23 @@ namespace Pegasustan.Domain
     /// <summary>
     /// Represents a port within Pegasus API.
     /// </summary>
-    public struct Port
+    public class Port
     {
         /// <summary>
         /// The port GUID.
         /// </summary>
         public Guid Id { get; }
-        
-        /// <summary>
-        /// The country GUID.
-        /// </summary>
-        public Guid CountryId { get; }
-        
+
         /// <summary>
         /// The language GUID.
         /// </summary>
         public Guid LanguageId { get; }
-        
+
+        /// <summary>
+        /// The port country.
+        /// </summary>
+        public Country Country { get; }
+
         /// <summary>
         /// The port name.
         /// </summary>
@@ -63,10 +63,10 @@ namespace Pegasustan.Domain
         public DateTime ModifiedAt { get; }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="T:Pegasustan.Domain.Port" /> struct.
+        /// Creates a new instance of the <see cref="T:Pegasustan.Domain.Port" /> class.
         /// </summary>
         /// <param name="id">The port GUID.</param>
-        /// <param name="countryId">The country GUID.</param>
+        /// <param name="country">The port country.</param>
         /// <param name="languageId">The language GUID.</param>
         /// <param name="name">The port name.</param>
         /// <param name="code">The port code.</param>
@@ -75,11 +75,11 @@ namespace Pegasustan.Domain
         /// <param name="filters">The port filters.</param>
         /// <param name="createdAt">The port entry creation date.</param>
         /// <param name="modifiedAt">The port entry modification date.</param>
-        private Port(Guid id, Guid countryId, Guid languageId, string name, string code, string cityName, bool domestic, string[] filters, DateTime createdAt, DateTime modifiedAt)
+        private Port(Guid id, Guid languageId, Country country, string name, string code, string cityName, bool domestic, string[] filters, DateTime createdAt, DateTime modifiedAt)
         {
             Id = id;
-            CountryId = countryId;
             LanguageId = languageId;
+            Country = country;
             Name = name;
             Code = code;
             CityName = cityName;
@@ -88,26 +88,40 @@ namespace Pegasustan.Domain
             CreatedAt = createdAt;
             ModifiedAt = modifiedAt;
         }
-        
+
         /// <summary>
         /// Converts the <see cref="T:System.Text.Json.Nodes.JsonNode"/> representation of a port to its <see cref="T:Pegasustan.Domain.Port"/> equivalent.
         /// </summary>
         /// <param name="node">A JSON node that contains a port data to convert.</param>
+        /// <param name="country">The country in which the port is located.</param>
         /// <returns>An object that is equivalent to the port data contained in <paramref name="node"/>.</returns>
-        public static Port Parse(JsonNode node)
+        /// <exception cref="ArgumentException">Passed JSON node does not represent a valid port data.</exception>
+        public static Port Parse(JsonNode node, Country country)
         {
-            var id = Guid.Parse((string)node["id"]);
-            var countryId = Guid.Parse((string)node["portMatrixId"]);
-            var languageId = Guid.Parse((string)node["languageId"]);
+            Guid.TryParse((string)node["id"] ?? string.Empty, out var id);
+            Guid.TryParse((string)node["languageId"] ?? string.Empty, out var languageId);
+            Guid.TryParse((string)node["portMatrixId"] ?? string.Empty, out var countryId);
             var name = (string)node["portName"];
             var code = (string)node["portCode"];
             var cityName = (string)node["cityName"];
             var domestic = (bool)node["domestic"];
-            var portFilters = node["filter"].AsArray().GetValues<string>().ToArray();
-            var createdAt = DateTime.Parse((string)node["createdDate"]);
-            var modifiedAt = DateTime.Parse((string)node["modifiedDate"]);
+            DateTime.TryParse((string)node["createdDate"] ?? string.Empty, out var createdAt);
+            DateTime.TryParse((string)node["modifiedDate"] ?? string.Empty, out var modifiedAt);
+            
+            if (id == Guid.Empty || languageId == Guid.Empty || name is null || code is null || cityName is null || createdAt == DateTime.MinValue || modifiedAt == DateTime.MinValue)
+            {
+                throw new ArgumentException("JSON node does not provide proper port data.");
+            }
+            
+            var portFilters = node["filter"]?.AsArray();
 
-            var port = new Port(id, countryId, languageId, name, code, cityName, domestic, portFilters, createdAt, modifiedAt);
+            if (portFilters is null)
+            {
+                throw new ArgumentException("JSON node does not provide proper port data.");
+            }
+            
+            var portFiltersArr = portFilters.GetValues<string>().ToArray();
+            var port = new Port(id, languageId, country, name, code, cityName, domestic, portFiltersArr, createdAt, modifiedAt);
             return port;
         }
     }
