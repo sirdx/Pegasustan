@@ -97,5 +97,15 @@ namespace Pegasustan.Domain
             country.Ports = ports;
             return country;
         }
+
+        /// <summary>
+        /// Finds a <see cref="T:Pegasustan.Domain.Port" /> by its code.
+        /// </summary>
+        /// <param name="code">The port code.</param>
+        /// <returns>A <see cref="T:Pegasustan.Domain.Port" /> reference if it is found, otherwise default value - null.</returns>
+        public Port FindPortByCode(string code)
+        {
+            return Ports.SingleOrDefault(port => port.Code.Equals(code, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }
