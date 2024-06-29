@@ -19,16 +19,14 @@ await client.InitializeAsync();
 // Fetch departure countries
 Country[] countries = await client.FetchDepartureCountriesAsync();
 
-// Pick the departure country and port
-Country turkiye = countries.FindCountryByCode("TR");
-Port ankaraPort = turkiye.FindPortByCode("ESB");
+// Pick a departure port
+Port ankaraPort = countries.FindPortByCountryAndPortCode("TR", "ESB");
 
 // Fetch arrival countries
 Country[] arrivalCountries = await client.FetchArrivalCountriesAsync(ankaraPort);
 
-// Pick the arrival country and port
-Country germany = arrivalCountries.FindCountryByCode("DE");
-Port berlinPort = germany.FindPortByCode("BER");
+// Pick an arrival port
+Port berlinPort = arrivalCountries.FindPortByCountryAndPortCode("DE", "BER");
 
 // Fetch ticket fares months counting from today in USD
 FaresMonth[] faresMonths = await client.FetchFaresMonthsAsync(ankaraPort, berlinPort, DateTime.Today, Currency.Dollar);
