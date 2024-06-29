@@ -1,4 +1,4 @@
-# Pegasustan
+# <img alt="Pegasustan" src="./Pegasustan/icon.png" width="28"/> Pegasustan
 [![dotnet](https://img.shields.io/badge/-.NET%20Standard%202.0-5C2D91?style=for-the-badge)](https://dotnet.microsoft.com/) [![latest version](https://img.shields.io/nuget/v/Pegasustan?style=for-the-badge)](https://www.nuget.org/packages/Pegasustan) [![downloads](https://img.shields.io/nuget/dt/Pegasustan?style=for-the-badge)](https://www.nuget.org/packages/Pegasustan)
 
 [Pegasus](https://www.flypgs.com/) API written in .NET Standard 2.0.
