@@ -1,9 +1,11 @@
-# <img alt="Pegasustan" src="./Pegasustan/icon.png" width="28"/> Pegasustan
+# <img alt="✈️" src="./Pegasustan/icon.png" width="28"/> Pegasustan
 [![dotnet](https://img.shields.io/badge/-.NET%20Standard%202.0-5C2D91?style=for-the-badge)](https://dotnet.microsoft.com/) [![latest version](https://img.shields.io/nuget/v/Pegasustan?style=for-the-badge)](https://www.nuget.org/packages/Pegasustan) [![downloads](https://img.shields.io/nuget/dt/Pegasustan?style=for-the-badge)](https://www.nuget.org/packages/Pegasustan)
 
 Unofficial [Pegasus](https://www.flypgs.com/) API written in .NET Standard 2.0.
 
 It provides a simple way to fetch ticket fares for a specified route. More functionality perhaps will be added later.
+
+*⚠️ This project is not (and will not be) related to [Pegasus NDC API](https://devportal.flypgs.com/)*
 
 ## Installation
 Pegasustan is available on [NuGet](https://www.nuget.org/packages/Pegasustan).
