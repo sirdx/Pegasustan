@@ -44,25 +44,38 @@ namespace Pegasustan
         
         /// <summary>
         /// The default API result language.
-        /// <remarks>It should get initialized by default to the English language when <c>InitializeAsync</c> is called. Then it can be changed to an other language.</remarks>
+        /// <remarks>It should be initialized by default to English.</remarks>
         /// </summary>
         public Language DefaultLanguage { get; set; }
 
         /// <summary>
         /// Creates a new instance of the <see cref="T:Pegasustan.PegasusClient" /> class.
         /// </summary>
-        public PegasusClient()
+        protected PegasusClient()
         {
             Client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0");
             Client.DefaultRequestHeaders.TryAddWithoutValidation("X-Platform", "web");
             Client.DefaultRequestHeaders.Accept.ParseAdd("*/*");
+        }
+
+        /// <summary>
+        /// Creates and initializes a new instance of the <see cref="T:Pegasustan.PegasusClient" /> class.
+        /// <remarks>It automatically</remarks>
+        /// </summary>
+        /// <returns>An initialized <see cref="T:Pegasustan.PegasusClient" /> object.</returns>
+        public static async Task<PegasusClient> CreateAsync()
+        {
+            var client = new PegasusClient();
+            await client.InitializeAsync();
+            
+            return client;
         }
         
         /// <summary>
         /// Initializes the <see cref="T:Pegasustan.PegasusClient" /> asynchronously.
         /// <remarks>The available API result languages are fetched and saved in the <c>Languages</c> property.</remarks>
         /// </summary>
-        public async Task InitializeAsync()
+        protected async Task InitializeAsync()
         {
             Languages = await FetchLanguagesAsync();
             DefaultLanguage = Languages.Single(lang => lang.Code.Equals("en", StringComparison.OrdinalIgnoreCase));

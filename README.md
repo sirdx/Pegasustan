@@ -13,8 +13,7 @@ The following code demonstrates basic usage of Pegasustan.
 
 ```csharp
 // Create and initialize PegasusClient
-PegasusClient client = new PegasusClient();
-await client.InitializeAsync();
+PegasusClient client = await PegasusClient.CreateAsync();
 
 // Fetch departure countries
 Country[] countries = await client.FetchDepartureCountriesAsync();

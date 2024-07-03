@@ -8,8 +8,7 @@ public sealed class PegasusClientTest
     [SetUp]
     public async Task Setup()
     {
-        _pegasusClient = new PegasusClient();
-        await _pegasusClient.InitializeAsync();
+        _pegasusClient = await PegasusClient.CreateAsync();
     }
 
     [Test]
