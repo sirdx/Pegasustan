@@ -15,9 +15,10 @@ namespace Pegasustan.Domain
         /// <param name="countries">A source of countries.</param>
         /// <param name="code">The country code.</param>
         /// <returns>A <see cref="T:Pegasustan.Domain.Country" /> reference if it is found, otherwise default value - null.</returns>
-        public static Country FindCountryByCode(this IEnumerable<Country> countries, string code)
+        public static Country FindByCode(this IEnumerable<Country> countries, string code)
         {
-            return countries.SingleOrDefault(country => country.Code.Equals(code, StringComparison.OrdinalIgnoreCase));
+            return countries.SingleOrDefault(country => 
+                country.Code.Equals(code, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -29,7 +30,7 @@ namespace Pegasustan.Domain
         /// <returns>A <see cref="T:Pegasustan.Domain.Port" /> reference if it is found, otherwise default value - null.</returns>
         public static Port FindPortByCountryAndPortCode(this IEnumerable<Country> countries, string countryCode, string portCode)
         {
-            var country = countries.FindCountryByCode(countryCode);
+            var country = countries.FindByCode(countryCode);
             return country?.FindPortByCode(portCode);
         }
     }
