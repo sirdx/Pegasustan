@@ -37,7 +37,7 @@ FaresMonth[] faresMonths = await client.FetchFaresMonthsAsync(ankaraPort, berlin
 The following code demonstrates how to change the API response language.
 
 ```csharp
-client.DefaultLanguage = client.Languages.FindByCode("tr");
+client.ChangeLanguage("tr");
 ```
 
 Currently, there are 7 available languages (according to [Pegasus](https://www.flypgs.com/) website):

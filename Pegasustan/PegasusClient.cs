@@ -38,12 +38,12 @@ namespace Pegasustan
         });
 
         /// <summary>
-        /// The available API result languages. 
+        /// The available API response languages. 
         /// </summary>
         public Language[] Languages { get; protected set; } = Array.Empty<Language>();
         
         /// <summary>
-        /// The default API result language.
+        /// The default API response language.
         /// <remarks>It should be initialized by default to English.</remarks>
         /// </summary>
         public Language DefaultLanguage { get; set; }
@@ -78,13 +78,22 @@ namespace Pegasustan
         protected async Task InitializeAsync()
         {
             Languages = await FetchLanguagesAsync();
-            DefaultLanguage = Languages.FindByCode("en");
+            ChangeLanguage("en");
         }
 
         /// <summary>
-        /// Fetches available API result languages.
+        /// Changes the API response language.
         /// </summary>
-        /// <returns>An array of available API result languages.</returns>
+        /// <param name="code">The language code.</param>
+        public void ChangeLanguage(string code)
+        {
+            DefaultLanguage = Languages.FindByCode(code);
+        }
+
+        /// <summary>
+        /// Fetches available API response languages.
+        /// </summary>
+        /// <returns>An array of available API response languages.</returns>
         public async Task<Language[]> FetchLanguagesAsync()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{LanguagesEndpoint}");
