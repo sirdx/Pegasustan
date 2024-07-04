@@ -78,7 +78,7 @@ namespace Pegasustan
         protected async Task InitializeAsync()
         {
             Languages = await FetchLanguagesAsync();
-            DefaultLanguage = Languages.Single(lang => lang.Code.Equals("en", StringComparison.OrdinalIgnoreCase));
+            DefaultLanguage = Languages.FindByCode("en");
         }
 
         /// <summary>

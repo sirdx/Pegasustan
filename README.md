@@ -33,6 +33,22 @@ Port berlinPort = arrivalCountries.FindPortByCountryAndPortCode("DE", "BER");
 FaresMonth[] faresMonths = await client.FetchFaresMonthsAsync(ankaraPort, berlinPort, DateTime.Today, Currency.Dollar);
 ```
 
+### Language selection
+The following code demonstrates how to change the API response language.
+
+```csharp
+client.DefaultLanguage = client.Languages.FindByCode("tr");
+```
+
+Currently there are 7 available languages (according to [Pegasus](https://www.flypgs.com/) website):
+- en (English, default)
+- tr (Turkish)
+- de (German)
+- fr (French)
+- ru (Russian)
+- it (Italian)
+- es (Spanish)
+
 ## Notice
 This project is in no way affiliated with Pegasus Airlines. This is just a hobby project created for fun.
 
