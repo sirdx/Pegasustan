@@ -40,7 +40,7 @@ The following code demonstrates how to change the API response language.
 client.DefaultLanguage = client.Languages.FindByCode("tr");
 ```
 
-Currently there are 7 available languages (according to [Pegasus](https://www.flypgs.com/) website):
+Currently, there are 7 available languages (according to [Pegasus](https://www.flypgs.com/) website):
 - en (English, default)
 - tr (Turkish)
 - de (German)
