@@ -5,7 +5,11 @@ Unofficial [Pegasus](https://www.flypgs.com/) API written in .NET Standard 2.0.
 
 It provides a simple way to fetch ticket fares for a specified route. More functionality perhaps will be added later.
 
-*⚠️ This project is not (and will not be) related to [Pegasus NDC API](https://devportal.flypgs.com/)*
+> [!Warning]
+> This project is not (and will not be) related to [Pegasus NDC API](https://devportal.flypgs.com/)
+
+> [!Note]
+> This project is in no way affiliated with Pegasus Airlines. This is just a hobby project created for fun.
 
 ## Installation
 Pegasustan is available on [NuGet](https://www.nuget.org/packages/Pegasustan).
@@ -48,9 +52,6 @@ Currently, there are 7 available languages (according to [Pegasus](https://www.f
 - ru (Russian)
 - it (Italian)
 - es (Spanish)
-
-## Notice
-This project is in no way affiliated with Pegasus Airlines. This is just a hobby project created for fun.
 
 ## Contributing
 There is a lot of to discover and add.
