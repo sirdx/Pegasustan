@@ -5,7 +5,7 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>Pegasustan</Title>
         <Authors>sirdx</Authors>
-        <Description>Unofficial Pegasus API written in .NET Standard 2.0.</Description>
+        <Description>Pegasus Unofficial API client written in .NET Standard 2.0.</Description>
         <PackageProjectUrl>https://github.com/sirdx/Pegasustan</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/sirdx/Pegasustan/blob/master/LICENSE.txt</PackageLicenseUrl>
         <PackageIcon>icon.png</PackageIcon>
