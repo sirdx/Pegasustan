@@ -14,10 +14,10 @@ namespace Pegasustan
     public class PegasusClient
     {
         // www.flypgs.com API
-        protected const string BaseApiAddress = "https://www.flypgs.com/";
-        protected const string DepartureCountryPortsEndpoint = "portmatrix/departure";
-        protected const string ArrivalCountryPortsEndpoint = "portmatrix/arrival";
-        protected const string FaresEndpoint = "apint/cheapfare/flight-calender-prices";
+        protected const string BaseApiAddress = "https://www.flypgs.com/apint/";
+        protected const string DepartureCountryPortsEndpoint = "pm/dep";
+        protected const string ArrivalCountryPortsEndpoint = "pm/arr";
+        protected const string FaresEndpoint = "cheapfare/flight-calender-prices";
         
         // web.flypgs.com API
         protected const string BaseWebApiAddress = "https://web.flypgs.com/pegasus/";
@@ -25,12 +25,8 @@ namespace Pegasustan
 
         // JSON nodes
         protected const string LanguagesNode = "languageList";
-        protected const string CountriesNode = "data";
+        protected const string CountriesNode = "list";
         protected const string FaresMonthsNode = "cheapFareFlightCalenderModelList"; // Yes, there is a typo in the API
-        
-        // Query parameters
-        protected const string LanguageQueryParameter = "lang";
-        protected const string DepartureCodeQueryParameter = "depCode";
 
         protected readonly HttpClient Client = new HttpClient(new HttpClientHandler
         {
@@ -116,12 +112,8 @@ namespace Pegasustan
         /// <returns>An array of departure countries.</returns>
         public async Task<Country[]> FetchDepartureCountriesAsync()
         {
-            var query = await ParamsToStringAsync(new Dictionary<string, string>
-            {
-                [LanguageQueryParameter] = DefaultLanguage.Code 
-            });
-
-            var response = await Client.GetAsync($"{BaseApiAddress}{DepartureCountryPortsEndpoint}?{query}");
+            var langCode = DefaultLanguage.Code.ToLower();
+            var response = await Client.GetAsync($"{BaseApiAddress}{DepartureCountryPortsEndpoint}/{langCode}");
             
             using (var jsonStream = await response.Content.ReadAsStreamAsync())
             {
@@ -137,13 +129,8 @@ namespace Pegasustan
         /// <returns>An array of possible arrival countries.</returns>
         public async Task<Country[]> FetchArrivalCountriesAsync(Port departurePort)
         {
-            var query = await ParamsToStringAsync(new Dictionary<string, string>
-            {
-                [LanguageQueryParameter] = DefaultLanguage.Code,
-                [DepartureCodeQueryParameter] = departurePort.Code
-            });
-
-            var response = await Client.GetAsync($"{BaseApiAddress}{ArrivalCountryPortsEndpoint}?{query}");
+            var langCode = DefaultLanguage.Code.ToLower();
+            var response = await Client.GetAsync($"{BaseApiAddress}{ArrivalCountryPortsEndpoint}/{langCode}/{departurePort.Code}");
             
             using (var jsonStream = await response.Content.ReadAsStreamAsync())
             {
