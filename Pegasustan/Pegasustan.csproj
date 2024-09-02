@@ -12,7 +12,8 @@
         <RepositoryUrl>https://github.com/sirdx/Pegasustan.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>pegasus api</PackageTags>
-        <PackageReleaseNotes>First Pegasustan release.</PackageReleaseNotes>
+        <PackageReleaseNotes>Added extensions, fixed endpoints and responses.</PackageReleaseNotes>
+        <Version>1.0.1</Version>
     </PropertyGroup>
 
     <ItemGroup>
