@@ -21,6 +21,7 @@ namespace Pegasustan
         
         // web.flypgs.com API
         protected const string BaseWebApiAddress = "https://web.flypgs.com/pegasus/";
+        protected const string StatusEndpoint = "cheapest-fare/status";
         protected const string LanguagesEndpoint = "common/languages";
 
         // JSON nodes
@@ -87,6 +88,23 @@ namespace Pegasustan
         public void ChangeLanguage(string code)
         {
             DefaultLanguage = Languages.FindByCode(code);
+        }
+
+        public async Task<bool> FetchStatusAsync()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{StatusEndpoint}");
+            // Web API for some reason requires 'Content-Type: application/json' in a GET request
+            // As a solution an empty JSON is passed, setting a request header manually does not work
+            request.Content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+            
+            var response = await Client.SendAsync(request);
+            
+            using (var stream = await response.Content.ReadAsStreamAsync())
+            {
+                var content = await JsonSerializer.DeserializeAsync<JsonObject>(stream); 
+                content.TryGetPropertyValue("status", out var statusNode);
+                return (bool)statusNode;
+            }
         }
 
         /// <summary>
