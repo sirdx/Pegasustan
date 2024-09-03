@@ -89,7 +89,11 @@ namespace Pegasustan
         {
             DefaultLanguage = Languages.FindByCode(code);
         }
-
+        
+        /// <summary>
+        /// Fetches API status.
+        /// </summary>
+        /// <returns>Boolean representing the service availability.</returns>
         public async Task<bool> FetchStatusAsync()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{StatusEndpoint}");
