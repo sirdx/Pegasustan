@@ -17,6 +17,9 @@ Pegasustan is available on [NuGet](https://www.nuget.org/packages/Pegasustan).
 ## Basic usage
 The following code demonstrates basic usage of Pegasustan.
 
+> [!Warning]
+> Pegasus API is unstable! Some functionalities can be suddenly gone or do not work as expected.
+
 ```csharp
 // Create and initialize PegasusClient
 PegasusClient client = await PegasusClient.CreateAsync();
