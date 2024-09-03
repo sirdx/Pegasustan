@@ -28,6 +28,9 @@ namespace Pegasustan
         protected const string CountriesNode = "list";
         protected const string FaresMonthsNode = "cheapFareFlightCalenderModelList"; // Yes, there is a typo in the API
 
+        // Website constants
+        protected const string DefaultLanguageCode = "en";
+
         protected readonly HttpClient Client = new HttpClient(new HttpClientHandler
         {
             AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.None
@@ -74,7 +77,7 @@ namespace Pegasustan
         protected async Task InitializeAsync()
         {
             Languages = await FetchLanguagesAsync();
-            ChangeLanguage("en");
+            ChangeLanguage(DefaultLanguageCode);
         }
 
         /// <summary>
