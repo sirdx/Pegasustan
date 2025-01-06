@@ -23,11 +23,13 @@ namespace Pegasustan
         protected const string BaseWebApiAddress = "https://web.flypgs.com/pegasus/";
         protected const string StatusEndpoint = "cheapest-fare/status";
         protected const string LanguagesEndpoint = "common/languages";
+        protected const string PortMatrixEndpoint = "port-matrix";
 
         // JSON nodes
         protected const string LanguagesNode = "languageList";
         protected const string CountriesNode = "list";
         protected const string FaresMonthsNode = "cheapFareFlightCalenderModelList"; // Yes, there is a typo in the API
+        protected const string PortMatrixRowsNode = "destinationList";
 
         // Website constants
         protected const string DefaultLanguageCode = "en";
@@ -132,6 +134,29 @@ namespace Pegasustan
         }
         
         /// <summary>
+        /// Fetches airport matrix aka destination list.
+        /// <remarks>This request can download a lot of data (a few megabytes). Be careful!</remarks>
+        /// </summary>
+        /// <param name="lastUpdatedTimestamp">The timestamp when the port matrix was last updated (default - 0 - assures the latest data).</param>
+        /// <returns>An array of port matrix rows.</returns>
+        public async Task<PortMatrixRow[]> FetchPortMatrixAsync(long lastUpdatedTimestamp = 0L)
+        {
+            var queryParams = await ParamsToStringAsync(new Dictionary<string, string> { { "lastUpdatedTimestamp", lastUpdatedTimestamp.ToString() } });
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{PortMatrixEndpoint}?{queryParams}");
+            // Web API for some reason requires 'Content-Type: application/json' in a GET request
+            // As a solution an empty JSON is passed, setting a request header manually does not work
+            request.Content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+            
+            var response = await Client.SendAsync(request);
+            
+            using (var stream = await response.Content.ReadAsStreamAsync())
+            {
+                var content = await JsonSerializer.DeserializeAsync<JsonObject>(stream);
+                return ParsePortMatrix(content);
+            }
+        }
+
+        /// <summary>
         /// Fetches departure countries.
         /// </summary>
         /// <returns>An array of departure countries.</returns>
@@ -210,6 +235,12 @@ namespace Pegasustan
         {
             var faresMonthsNode = jsonObject[FaresMonthsNode].AsArray();
             return faresMonthsNode.Select(node => FaresMonth.Parse(node, departurePort, arrivalPort, currency)).ToArray();
+        }
+        
+        private PortMatrixRow[] ParsePortMatrix(JsonObject content)
+        {
+            var portMatrixRowsNode = content[PortMatrixRowsNode].AsArray();
+            return portMatrixRowsNode.Select(PortMatrixRow.Parse).ToArray();
         }
 
         protected static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)
