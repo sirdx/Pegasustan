@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Pegasustan.Domain;
+using Pegasustan.Utils;
 
 namespace Pegasustan
 {
@@ -63,12 +64,22 @@ namespace Pegasustan
         /// <summary>
         /// Creates and initializes a new instance of the <see cref="T:Pegasustan.PegasusClient" /> class.
         /// </summary>
+        /// <param name="statusCheck">Should the status of the API be checked (true by default).</param>
+        /// <exception cref="T:Pegasustan.Utils.PegasusException">Thrown when <paramref name="statusCheck"/> is true and the Pegasus API is unavailable.</exception>
         /// <returns>An initialized <see cref="T:Pegasustan.PegasusClient" /> object.</returns>
-        public static async Task<PegasusClient> CreateAsync()
+        public static async Task<PegasusClient> CreateAsync(bool statusCheck = true)
         {
             var client = new PegasusClient();
+
+            if (statusCheck)
+            {
+                if (!await client.FetchStatusAsync())
+                {
+                    throw new PegasusException("The Pegasus API is currently unavailable.");
+                }
+            }
+
             await client.InitializeAsync();
-            
             return client;
         }
         
