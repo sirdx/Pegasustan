@@ -24,7 +24,6 @@ namespace Pegasustan.Domain
         /// </summary>
         public string CountryName { get; }
         
-                
         /// <summary>
         /// The port country code.
         /// </summary>
