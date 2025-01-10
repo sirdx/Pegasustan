@@ -19,6 +19,7 @@ namespace Pegasustan
         protected const string DepartureCountryPortsEndpoint = "pm/dep";
         protected const string ArrivalCountryPortsEndpoint = "pm/arr";
         protected const string FaresEndpoint = "cheapfare/flight-calender-prices";
+        protected const string CitiesForBestDealsEndpoint = "BestDeals/GetCitiesForBestDeals";
         
         // web.flypgs.com API
         protected const string BaseWebApiAddress = "https://web.flypgs.com/pegasus/";
@@ -31,6 +32,7 @@ namespace Pegasustan
         protected const string CountriesNode = "list";
         protected const string FaresMonthsNode = "cheapFareFlightCalenderModelList"; // Yes, there is a typo in the API
         protected const string PortMatrixRowsNode = "destinationList";
+        protected const string BestDealsCitiesNode = "cities";
 
         // Website constants
         protected const string DefaultLanguageCode = "en";
@@ -222,6 +224,23 @@ namespace Pegasustan
                 return ParseFaresMonths(responseContent, departurePort, arrivalPort, currency);
             }
         }
+        
+        /// <summary>
+        /// Fetches cities for best deals.
+        /// </summary>
+        /// <returns>An array of cities.</returns>
+        public async Task<BestDealsCity[]> GetCitiesForBestDealsAsync()
+        {
+            var langCode = DefaultLanguage.Code.ToLower();
+            var queryParams = await ParamsToStringAsync(new Dictionary<string, string> { { "language", langCode } });
+            var response = await Client.GetAsync($"{BaseApiAddress}{CitiesForBestDealsEndpoint}?{queryParams}");
+            
+            using (var jsonStream = await response.Content.ReadAsStreamAsync())
+            {
+                var content = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
+                return ParseBestDealsCities(content);
+            }
+        }
 
         protected static void PrepareWebApiRequest(HttpRequestMessage request)
         {
@@ -252,6 +271,12 @@ namespace Pegasustan
         {
             var portMatrixRowsNode = content[PortMatrixRowsNode].AsArray();
             return portMatrixRowsNode.Select(PortMatrixRow.Parse).ToArray();
+        }
+        
+        private BestDealsCity[] ParseBestDealsCities(JsonObject content)
+        {
+            var citiesNode = content[BestDealsCitiesNode].AsArray();
+            return citiesNode.Select(BestDealsCity.Parse).ToArray();
         }
 
         protected static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)
