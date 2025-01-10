@@ -99,9 +99,7 @@ namespace Pegasustan
         public async Task<bool> FetchStatusAsync()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{StatusEndpoint}");
-            // Web API for some reason requires 'Content-Type: application/json' in a GET request
-            // As a solution an empty JSON is passed, setting a request header manually does not work
-            request.Content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+            PrepareWebApiRequest(request);
             
             var response = await Client.SendAsync(request);
             
@@ -120,9 +118,7 @@ namespace Pegasustan
         public async Task<Language[]> FetchLanguagesAsync()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{LanguagesEndpoint}");
-            // Web API for some reason requires 'Content-Type: application/json' in a GET request
-            // As a solution an empty JSON is passed, setting a request header manually does not work
-            request.Content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+            PrepareWebApiRequest(request);
             
             var response = await Client.SendAsync(request);
             
@@ -143,9 +139,7 @@ namespace Pegasustan
         {
             var queryParams = await ParamsToStringAsync(new Dictionary<string, string> { { "lastUpdatedTimestamp", lastUpdatedTimestamp.ToString() } });
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{PortMatrixEndpoint}?{queryParams}");
-            // Web API for some reason requires 'Content-Type: application/json' in a GET request
-            // As a solution an empty JSON is passed, setting a request header manually does not work
-            request.Content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+            PrepareWebApiRequest(request);
             
             var response = await Client.SendAsync(request);
             
@@ -217,6 +211,13 @@ namespace Pegasustan
                 var responseContent = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
                 return ParseFaresMonths(responseContent, departurePort, arrivalPort, currency);
             }
+        }
+
+        protected static void PrepareWebApiRequest(HttpRequestMessage request)
+        {
+            // Web API for some reason requires 'Content-Type: application/json' in a GET request
+            // As a solution an empty JSON is passed, setting a request header manually does not work
+            request.Content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
         }
 
         protected static Language[] ParseLanguages(JsonObject jsonObject)
