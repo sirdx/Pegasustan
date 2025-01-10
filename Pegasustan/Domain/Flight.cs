@@ -85,12 +85,6 @@ namespace Pegasustan.Domain
             }
             
             var amount = (decimal)cheapFareNode["amount"];
-            var currencyCode = (string)cheapFareNode["currency"];
-            
-            if (currencyCode is null)
-            {
-                throw new ArgumentException("JSON node does not provide proper flight data.");
-            }
 
             var flight = new Flight(date, campaignFare, amount, currency);
             return flight;
