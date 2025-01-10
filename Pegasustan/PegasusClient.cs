@@ -20,6 +20,7 @@ namespace Pegasustan
         protected const string ArrivalCountryPortsEndpoint = "pm/arr";
         protected const string FaresEndpoint = "cheapfare/flight-calender-prices";
         protected const string CitiesForBestDealsEndpoint = "BestDeals/GetCitiesForBestDeals";
+        protected const string BestDealsEndpoint = "BestDeals/GetBestDeals";
         
         // web.flypgs.com API
         protected const string BaseWebApiAddress = "https://web.flypgs.com/pegasus/";
@@ -33,6 +34,7 @@ namespace Pegasustan
         protected const string FaresMonthsNode = "cheapFareFlightCalenderModelList"; // Yes, there is a typo in the API
         protected const string PortMatrixRowsNode = "destinationList";
         protected const string BestDealsCitiesNode = "cities";
+        protected const string BestDealsNode = "data";
 
         // Website constants
         protected const string DefaultLanguageCode = "en";
@@ -241,6 +243,41 @@ namespace Pegasustan
                 return ParseBestDealsCities(content);
             }
         }
+        
+        /// <summary>
+        /// Fetches best deals for the given city and currency.
+        /// <remarks>Supports pagination.</remarks>
+        /// </summary>
+        /// <param name="departureCity">The best-deals city from which the flights begin.</param>
+        /// <param name="currency">The currency in which the fares should be presented.</param>
+        /// <param name="page">The page of deals (each contains at most 10 elements, set to 0 by default).</param>
+        /// <returns>An array of best deals.</returns>
+        public async Task<BestDeal[]> GetBestDealsAsync(BestDealsCity departureCity, Currency currency, uint page = 0U)
+        {
+            var payload = new
+            {
+                channel = "WEB",
+                currency = currency.Code,
+                domestic = "tr" == DefaultLanguage.Code.ToLower(),
+                languageCode = DefaultLanguage.Code,
+                depPort = departureCity.Code,
+                page
+            };
+            
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            var queryParams = await ParamsToStringAsync(new Dictionary<string, string> { { "v", timestamp.ToString() } });
+            
+            var jsonPayload = JsonSerializer.Serialize(payload);
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+            var response = await Client.PostAsync($"{BaseApiAddress}{BestDealsEndpoint}?{queryParams}", content);
+            response.EnsureSuccessStatusCode();
+            
+            using (var jsonStream = await response.Content.ReadAsStreamAsync())
+            {
+                var responseContent = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
+                return ParseBestDeals(responseContent, departureCity, currency);
+            }
+        }
 
         protected static void PrepareWebApiRequest(HttpRequestMessage request)
         {
@@ -277,6 +314,12 @@ namespace Pegasustan
         {
             var citiesNode = content[BestDealsCitiesNode].AsArray();
             return citiesNode.Select(BestDealsCity.Parse).ToArray();
+        }
+        
+        private BestDeal[] ParseBestDeals(JsonObject content, BestDealsCity departureCity, Currency currency)
+        {
+            var dealsNode = content[BestDealsNode].AsArray();
+            return dealsNode.Select(node => BestDeal.Parse(node, departureCity, currency)).ToArray();
         }
 
         protected static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)
