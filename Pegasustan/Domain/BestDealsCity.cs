@@ -33,7 +33,7 @@ namespace Pegasustan.Domain
         /// <summary>
         /// Converts the <see cref="T:System.Text.Json.Nodes.JsonNode"/> representation of a best-deals city to its <see cref="T:Pegasustan.Domain.BestDealsCity"/> equivalent.
         /// </summary>
-        /// <param name="node">A JSON node that contains a best-deals city matrix item data to convert.</param>
+        /// <param name="node">A JSON node that contains a best-deals city data to convert.</param>
         /// <returns>An object that is equivalent to the best-deals city data contained in <paramref name="node"/>.</returns>
         /// <exception cref="ArgumentException">Passed JSON node does not represent a valid best-deals city data.</exception>
         public static BestDealsCity Parse(JsonNode node)
