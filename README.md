@@ -21,23 +21,30 @@ The following code demonstrates basic usage of Pegasustan.
 > Pegasus API is unstable! Some functionalities can be suddenly gone or do not work as expected.
 
 ```csharp
-// Create and initialize PegasusClient
-PegasusClient client = await PegasusClient.CreateAsync();
-
-// Fetch departure countries
-Country[] countries = await client.FetchDepartureCountriesAsync();
-
-// Pick a departure port
-Port ankaraPort = countries.FindPortByCountryAndPortCode("TR", "ESB");
-
-// Fetch arrival countries
-Country[] arrivalCountries = await client.FetchArrivalCountriesAsync(ankaraPort);
-
-// Pick an arrival port
-Port berlinPort = arrivalCountries.FindPortByCountryAndPortCode("DE", "BER");
-
-// Fetch ticket fares months counting from today in USD
-FaresMonth[] faresMonths = await client.FetchFaresMonthsAsync(ankaraPort, berlinPort, DateTime.Today, Currency.Dollar);
+try 
+{
+    // Create and initialize PegasusClient
+    PegasusClient client = await PegasusClient.CreateAsync();
+    
+    // Fetch departure countries
+    Country[] countries = await client.GetDepartureCountriesAsync();
+    
+    // Pick a departure port
+    Port ankaraPort = countries.FindPortByCountryAndPortCode("TR", "ESB");
+    
+    // Fetch arrival countries
+    Country[] arrivalCountries = await client.GetArrivalCountriesAsync(ankaraPort);
+    
+    // Pick an arrival port
+    Port berlinPort = arrivalCountries.FindPortByCountryAndPortCode("DE", "BER");
+    
+    // Fetch ticket fares months counting from today in USD
+    FaresMonth[] faresMonths = await client.GetFaresMonthsAsync(ankaraPort, berlinPort, DateTime.Today, Currency.Dollar);
+}
+catch (PegasusException ex)
+{
+    // The API is likely unavailable or changed...
+}
 ```
 
 ### Language selection

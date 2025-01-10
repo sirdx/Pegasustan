@@ -73,7 +73,7 @@ namespace Pegasustan
 
             if (statusCheck)
             {
-                if (!await client.FetchStatusAsync())
+                if (!await client.GetStatusAsync())
                 {
                     throw new PegasusException("The Pegasus API is currently unavailable.");
                 }
@@ -89,7 +89,7 @@ namespace Pegasustan
         /// </summary>
         protected async Task InitializeAsync()
         {
-            Languages = await FetchLanguagesAsync();
+            Languages = await GetLanguagesAsync();
             ChangeLanguage(DefaultLanguageCode);
         }
 
@@ -106,7 +106,7 @@ namespace Pegasustan
         /// Fetches API status.
         /// </summary>
         /// <returns>Boolean representing the service availability.</returns>
-        public async Task<bool> FetchStatusAsync()
+        public async Task<bool> GetStatusAsync()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{StatusEndpoint}");
             PrepareWebApiRequest(request);
@@ -125,7 +125,7 @@ namespace Pegasustan
         /// Fetches available API response languages.
         /// </summary>
         /// <returns>An array of available API response languages.</returns>
-        public async Task<Language[]> FetchLanguagesAsync()
+        public async Task<Language[]> GetLanguagesAsync()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{LanguagesEndpoint}");
             PrepareWebApiRequest(request);
@@ -145,7 +145,7 @@ namespace Pegasustan
         /// </summary>
         /// <param name="lastUpdatedTimestamp">The timestamp when the port matrix was last updated (default - 0 - assures the latest data).</param>
         /// <returns>An array of port matrix rows.</returns>
-        public async Task<PortMatrixRow[]> FetchPortMatrixAsync(long lastUpdatedTimestamp = 0L)
+        public async Task<PortMatrixRow[]> GetPortMatrixAsync(long lastUpdatedTimestamp = 0L)
         {
             var queryParams = await ParamsToStringAsync(new Dictionary<string, string> { { "lastUpdatedTimestamp", lastUpdatedTimestamp.ToString() } });
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{PortMatrixEndpoint}?{queryParams}");
@@ -164,7 +164,7 @@ namespace Pegasustan
         /// Fetches departure countries.
         /// </summary>
         /// <returns>An array of departure countries.</returns>
-        public async Task<Country[]> FetchDepartureCountriesAsync()
+        public async Task<Country[]> GetDepartureCountriesAsync()
         {
             var langCode = DefaultLanguage.Code.ToLower();
             var response = await Client.GetAsync($"{BaseApiAddress}{DepartureCountryPortsEndpoint}/{langCode}");
@@ -181,7 +181,7 @@ namespace Pegasustan
         /// </summary>
         /// <param name="departurePort">The port from which the flight begins.</param>
         /// <returns>An array of possible arrival countries.</returns>
-        public async Task<Country[]> FetchArrivalCountriesAsync(Port departurePort)
+        public async Task<Country[]> GetArrivalCountriesAsync(Port departurePort)
         {
             var langCode = DefaultLanguage.Code.ToLower();
             var response = await Client.GetAsync($"{BaseApiAddress}{ArrivalCountryPortsEndpoint}/{langCode}/{departurePort.Code}");
@@ -201,7 +201,7 @@ namespace Pegasustan
         /// <param name="flightDate">The date from which the fares months should be counted.</param>
         /// <param name="currency">The currency in which the fares should be presented.</param>
         /// <returns>An array of fares months.</returns>
-        public async Task<FaresMonth[]> FetchFaresMonthsAsync(Port departurePort, Port arrivalPort, DateTime flightDate, Currency currency)
+        public async Task<FaresMonth[]> GetFaresMonthsAsync(Port departurePort, Port arrivalPort, DateTime flightDate, Currency currency)
         {
             var payload = new
             {
