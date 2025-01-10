@@ -54,6 +54,16 @@ The following code demonstrates how to change the API response language.
 client.ChangeLanguage("tr");
 ```
 
+Currently, there are 8 available languages (according to [Pegasus](https://www.flypgs.com/) website):
+- en (English, default)
+- tr (Turkish)
+- de (German)
+- fr (French)
+- ru (Russian)
+- it (Italian)
+- es (Spanish)
+- ar (Arabic)
+
 ### Best deals
 The following code demonstrates how to get the best deals for a certain city.
 
@@ -67,16 +77,6 @@ BestDealsCity amsterdamCity = cities.FindByCode("AMS");
 // Fetch best deals in USD
 BestDeal[] bestDeals = await _pegasusClient.GetBestDealsAsync(amsterdamCity, Currency.Dollar);
 ```
-
-Currently, there are 8 available languages (according to [Pegasus](https://www.flypgs.com/) website):
-- en (English, default)
-- tr (Turkish)
-- de (German)
-- fr (French)
-- ru (Russian)
-- it (Italian)
-- es (Spanish)
-- ar (Arabic)
 
 ## Contributing
 There is a lot of to discover and add.
