@@ -62,7 +62,6 @@ namespace Pegasustan
 
         /// <summary>
         /// Creates and initializes a new instance of the <see cref="T:Pegasustan.PegasusClient" /> class.
-        /// <remarks>It automatically</remarks>
         /// </summary>
         /// <returns>An initialized <see cref="T:Pegasustan.PegasusClient" /> object.</returns>
         public static async Task<PegasusClient> CreateAsync()
