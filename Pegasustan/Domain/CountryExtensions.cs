@@ -5,7 +5,7 @@ using System.Linq;
 namespace Pegasustan.Domain
 {
     /// <summary>
-    /// Provides Country extensions.
+    /// Provides <see cref="T:Pegasustan.Domain.Country"/> extensions.
     /// </summary>
     public static class CountryExtensions
     {
