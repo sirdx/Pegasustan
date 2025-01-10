@@ -69,13 +69,13 @@ The following code demonstrates how to get the best deals for a certain city.
 
 ```csharp
 // Fetch cities with the best deals
-BestDealsCity[] cities = await _pegasusClient.GetCitiesForBestDealsAsync();
+BestDealsCity[] cities = await client.GetCitiesForBestDealsAsync();
 
 // Pick a city
 BestDealsCity amsterdamCity = cities.FindByCode("AMS");
 
 // Fetch best deals in USD
-BestDeal[] bestDeals = await _pegasusClient.GetBestDealsAsync(amsterdamCity, Currency.Dollar);
+BestDeal[] bestDeals = await client.GetBestDealsAsync(amsterdamCity, Currency.Dollar);
 ```
 
 ## Contributing
