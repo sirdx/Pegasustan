@@ -39,7 +39,7 @@ try
     Port berlinPort = arrivalCountries.FindPortByCountryAndPortCode("DE", "BER");
     
     // Fetch ticket fares months counting from today in USD
-    FaresMonth[] faresMonths = await client.GetFaresMonthsAsync(ankaraPort, berlinPort, DateTime.Today, Currency.Dollar);
+    FaresMonth[] faresMonths = await client.GetFaresMonthsAsync(ankaraPort, berlinPort, DateTime.Today.ToUniversalTime(), Currency.Dollar);
 }
 catch (PegasusException ex)
 {

@@ -202,16 +202,18 @@ namespace Pegasustan
         /// </summary>
         /// <param name="departurePort">The port from which the flight begins.</param>
         /// <param name="arrivalPort">The port at which the flight ends.</param>
-        /// <param name="flightDate">The date from which the fares months should be counted.</param>
+        /// <param name="flightDate">The UTC based date from which the fares months should be counted.</param>
         /// <param name="currency">The currency in which the fares should be presented.</param>
         /// <returns>An array of fares months.</returns>
         public async Task<FaresMonth[]> GetFaresMonthsAsync(Port departurePort, Port arrivalPort, DateTime flightDate, Currency currency)
         {
+            var localFlightDate = ConvertToTurkeyTimeZone(flightDate);
+            
             var payload = new
             {
                 depPort = departurePort.Code,
                 arrPort = arrivalPort.Code,
-                flightDate = flightDate.ToString("yyyy-MM-dd"),
+                flightDate = localFlightDate.ToString("yyyy-MM-dd"),
                 currency = currency.Code
             };
             
@@ -226,7 +228,7 @@ namespace Pegasustan
                 return ParseFaresMonths(responseContent, departurePort, arrivalPort, currency);
             }
         }
-        
+
         /// <summary>
         /// Fetches cities for best deals.
         /// </summary>
@@ -328,6 +330,14 @@ namespace Pegasustan
             {
                 return await content.ReadAsStringAsync();
             }
+        }
+        
+        protected static DateTime ConvertToTurkeyTimeZone(DateTime dateTime)
+        {
+            var turkeyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time"); 
+            var turkeyDateTime = TimeZoneInfo.ConvertTimeFromUtc(dateTime, turkeyTimeZone);
+            
+            return turkeyDateTime;
         }
     }
 }
