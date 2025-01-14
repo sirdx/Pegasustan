@@ -76,10 +76,10 @@ foreach (PortMatrixRow row in portMatrix)
 {
     PortMatrixItem departurePort = row.Departure;
 
-    foreach (PortMatrixItem arrival in row.Arrivals)
+    foreach (PortMatrixItem arrivalPort in row.Arrivals)
     {
         // Print all combinations like: ESB -> BER
-        Console.WriteLine($"{departurePort.Code} -> {arrival.Code}");
+        Console.WriteLine($"{departurePort.Code} -> {arrivalPort.Code}");
     }
 }
 ```
