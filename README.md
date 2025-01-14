@@ -64,6 +64,26 @@ Currently, there are 8 available languages (according to [Pegasus](https://www.f
 - es (Spanish)
 - ar (Arabic)
 
+### Port matrix
+The following code demonstrates how to get and iterate through all of the airport combinations.
+
+```csharp
+// Fetch port matrix
+PortMatrixRow[] portMatrix = await client.GetPortMatrixAsync();
+
+// Iterate through the rows
+foreach (PortMatrixRow row in portMatrix)
+{
+    PortMatrixItem departurePort = row.Departure;
+
+    foreach (PortMatrixItem arrival in row.Arrivals)
+    {
+        // Print all combinations like: ESB -> BER
+        Console.WriteLine($"{departurePort.Code} -> {arrival.Code}");
+    }
+}
+```
+
 ### Best deals
 The following code demonstrates how to get the best deals for a certain city.
 
