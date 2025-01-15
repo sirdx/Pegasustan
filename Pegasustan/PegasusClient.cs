@@ -27,6 +27,8 @@ namespace Pegasustan
         protected const string StatusEndpoint = "cheapest-fare/status";
         protected const string LanguagesEndpoint = "common/languages";
         protected const string PortMatrixEndpoint = "port-matrix";
+        protected const string CurrenciesEndpoint = "common/currency-codes";
+        protected const string FareCurrenciesEndpoint = "cheapest-fare/currency-codes";
 
         // JSON nodes
         protected const string LanguagesNode = "languageList";
@@ -35,6 +37,7 @@ namespace Pegasustan
         protected const string PortMatrixRowsNode = "destinationList";
         protected const string BestDealsCitiesNode = "cities";
         protected const string BestDealsNode = "data";
+        protected const string CurrenciesNode = "codeList";
 
         // Website constants
         protected const string DefaultLanguageCode = "en";
@@ -54,6 +57,11 @@ namespace Pegasustan
         /// <remarks>It should be initialized by default to English.</remarks>
         /// </summary>
         public Language DefaultLanguage { get; set; }
+        
+        /// <summary>
+        /// The available API response currencies. 
+        /// </summary>
+        public Currency[] Currencies { get; protected set; } = Array.Empty<Currency>();
 
         /// <summary>
         /// Creates a new instance of the <see cref="T:Pegasustan.PegasusClient" /> class.
@@ -89,12 +97,14 @@ namespace Pegasustan
         
         /// <summary>
         /// Initializes the <see cref="T:Pegasustan.PegasusClient" /> asynchronously.
-        /// <remarks>The available API result languages are fetched and saved in the <c>Languages</c> property.</remarks>
+        /// <remarks>The available API result languages and currencies are fetched and saved in the <c>Languages</c> and <c>Currencies</c> properties.</remarks>
         /// </summary>
         protected async Task InitializeAsync()
         {
             Languages = await GetLanguagesAsync();
             ChangeLanguage(DefaultLanguageCode);
+
+            Currencies = await GetCurrenciesAsync();
         }
 
         /// <summary>
@@ -140,6 +150,33 @@ namespace Pegasustan
             {
                 var content = await JsonSerializer.DeserializeAsync<JsonObject>(stream);
                 return ParseLanguages(content);
+            }
+        }
+        
+        public async Task<Currency[]> GetCurrenciesAsync()
+        {
+            var fareRequest = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{FareCurrenciesEndpoint}");
+            PrepareWebApiRequest(fareRequest);
+            
+            var fareResponse = await Client.SendAsync(fareRequest);
+            IEnumerable<string> fareSupportingCurrencies;
+            
+            using (var stream = await fareResponse.Content.ReadAsStreamAsync())
+            {
+                var content = await JsonSerializer.DeserializeAsync<JsonObject>(stream);
+                var currenciesNode = content[CurrenciesNode].AsArray();
+                fareSupportingCurrencies = currenciesNode.Select(currency => (string)currency);
+            }
+            
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{CurrenciesEndpoint}");
+            PrepareWebApiRequest(request);
+            
+            var response = await Client.SendAsync(request);
+            
+            using (var stream = await response.Content.ReadAsStreamAsync())
+            {
+                var content = await JsonSerializer.DeserializeAsync<JsonObject>(stream);
+                return ParseCurrencies(content, fareSupportingCurrencies);
             }
         }
         
@@ -203,10 +240,16 @@ namespace Pegasustan
         /// <param name="departurePort">The port from which the flight begins.</param>
         /// <param name="arrivalPort">The port at which the flight ends.</param>
         /// <param name="flightDate">The UTC based date from which the fares months should be counted.</param>
-        /// <param name="currency">The currency in which the fares should be presented.</param>
+        /// <param name="currency">The currency in which the fares should be presented (only the ones that support cheapest-fare requests).</param>
         /// <returns>An array of fares months.</returns>
+        /// <exception cref="ArgumentException">Passed currency does not support cheapest-fare requests.</exception>
         public async Task<FaresMonth[]> GetFaresMonthsAsync(Port departurePort, Port arrivalPort, DateTime flightDate, Currency currency)
         {
+            if (!currency.SupportsCheapestFare)
+            {
+                throw new ArgumentException("Currency does not support cheapest fare requests.");
+            }
+            
             var localFlightDate = ConvertToTurkeyTimeZone(flightDate);
             
             var payload = new
@@ -294,6 +337,12 @@ namespace Pegasustan
             return languagesNode.Select(Language.Parse).ToArray();
         }
         
+        protected Currency[] ParseCurrencies(JsonObject content, IEnumerable<string> fareSupportingCurrencies)
+        {
+            var currenciesNode = content[CurrenciesNode].AsArray();
+            return currenciesNode.Select(node => Currency.Parse(node, fareSupportingCurrencies)).ToArray();
+        }
+        
         protected static Country[] ParseCountries(JsonObject jsonObject)
         {
             var countriesNode = jsonObject[CountriesNode].AsArray();
@@ -306,24 +355,24 @@ namespace Pegasustan
             return faresMonthsNode.Select(node => FaresMonth.Parse(node, departurePort, arrivalPort, currency)).ToArray();
         }
         
-        private PortMatrixRow[] ParsePortMatrix(JsonObject content)
+        protected PortMatrixRow[] ParsePortMatrix(JsonObject content)
         {
             var portMatrixRowsNode = content[PortMatrixRowsNode].AsArray();
             return portMatrixRowsNode.Select(PortMatrixRow.Parse).ToArray();
         }
         
-        private BestDealsCity[] ParseBestDealsCities(JsonObject content)
+        protected BestDealsCity[] ParseBestDealsCities(JsonObject content)
         {
             var citiesNode = content[BestDealsCitiesNode].AsArray();
             return citiesNode.Select(BestDealsCity.Parse).ToArray();
         }
         
-        private BestDeal[] ParseBestDeals(JsonObject content, BestDealsCity departureCity, Currency currency)
+        protected BestDeal[] ParseBestDeals(JsonObject content, BestDealsCity departureCity, Currency currency)
         {
             var dealsNode = content[BestDealsNode].AsArray();
             return dealsNode.Select(node => BestDeal.Parse(node, departureCity, currency)).ToArray();
         }
-
+        
         protected static async Task<string> ParamsToStringAsync(Dictionary<string, string> urlParams)
         {
             using (HttpContent content = new FormUrlEncodedContent(urlParams))
