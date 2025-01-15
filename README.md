@@ -39,7 +39,7 @@ try
     Port berlinPort = arrivalCountries.FindPortByCountryAndPortCode("DE", "BER");
     
     // Pick a currency for the request
-    Currency usd = client.Currencies.FindByCode("USD")
+    Currency usd = client.Currencies.FindByCode("USD");
     
     // Fetch ticket fares months counting from today in USD
     FaresMonth[] faresMonths = await client.GetFaresMonthsAsync(
