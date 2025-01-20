@@ -14,7 +14,7 @@ It provides a simple way to fetch ticket fares for a specified route. More funct
 ## Installation
 Pegasustan is available on [NuGet](https://www.nuget.org/packages/Pegasustan).
 
-## Basic usage
+## Usage
 The following code demonstrates basic usage of Pegasustan.
 
 > [!Warning]
@@ -39,7 +39,7 @@ try
     Port berlinPort = arrivalCountries.FindPortByCountryAndPortCode("DE", "BER");
     
     // Pick a currency for the request
-    Currency usd = client.Currencies.FindByCode("USD");
+    Currency usd = (await client.GetCurrenciesAsync()).FindByCode("USD");
     
     // Fetch ticket fares months counting from today in USD
     FaresMonth[] faresMonths = await client.GetFaresMonthsAsync(
@@ -70,6 +70,18 @@ Currently, there are 8 available languages (according to [Pegasus](https://www.f
 - it (Italian)
 - es (Spanish)
 - ar (Arabic)
+
+### Caching
+`PegasusClient` supports 3 modes of response caching:
+- **None** - Do not cache responses at all.
+- **_Smart_** - Cache some of the responses according to their probable lifetime/freshness. _Set by default._
+- **Forced** - Cache all the responses that can be cached and do not update them at any point.
+
+You can change the mode using the `Caching` property in the `PegasusClient`.
+
+```csharp
+client.Caching = PegasusClient.CachingMode.None;
+```
 
 ### Port matrix
 The following code demonstrates how to get and iterate through all of the airport combinations.

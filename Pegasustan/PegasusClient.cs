@@ -12,8 +12,33 @@ using Pegasustan.Utils;
 
 namespace Pegasustan
 {
+    /// <summary>
+    /// Provides a class for sending and receiving unofficial Pegasus API requests and responses.
+    /// </summary>
     public class PegasusClient
     {
+        /// <summary>
+        /// Represents the response caching mode used throughout the <see cref="T:Pegasustan.PegasusClient"/> while sending requests to the API.
+        /// <remarks>Works only for the requests that can or should be cached.</remarks>
+        /// </summary>
+        public enum CachingMode
+        {
+            /// <summary>
+            /// Do not cache responses at all.
+            /// </summary>
+            None,
+            
+            /// <summary>
+            /// Cache some of the responses according to their probable lifetime/freshness.
+            /// </summary>
+            Smart,
+            
+            /// <summary>
+            /// Cache all the responses that can be cached and do not update them at any point.
+            /// </summary>
+            Forced
+        }
+        
         // www.flypgs.com API
         protected const string BaseApiAddress = "https://www.flypgs.com/apint/";
         protected const string DepartureCountryPortsEndpoint = "pm/dep";
@@ -48,9 +73,17 @@ namespace Pegasustan
         });
 
         /// <summary>
+        /// The API response caching mode (for some of the requests that can or should be cached).
+        /// <remarks><c>Smart</c> mode should be enough for most of the users, so it is set by default.</remarks>
+        /// </summary>
+        public CachingMode Caching { get; set; } = CachingMode.Smart;
+
+        /// <summary>
         /// The available API response languages. 
         /// </summary>
-        public Language[] Languages { get; protected set; } = Array.Empty<Language>();
+        protected Language[] Languages = Array.Empty<Language>();
+        protected DateTimeOffset LanguagesLastCacheTime = DateTimeOffset.MinValue;
+        protected readonly TimeSpan LanguagesCacheTime = new TimeSpan(12, 0, 0); 
         
         /// <summary>
         /// The default API response language.
@@ -61,7 +94,21 @@ namespace Pegasustan
         /// <summary>
         /// The available API response currencies. 
         /// </summary>
-        public Currency[] Currencies { get; protected set; } = Array.Empty<Currency>();
+        protected Currency[] Currencies = Array.Empty<Currency>();
+        protected DateTimeOffset CurrenciesLastCacheTime = DateTimeOffset.MinValue;
+        protected readonly TimeSpan CurrenciesCacheTime = new TimeSpan(0, 30, 0); 
+        
+        protected PortMatrixRow[] PortMatrix = Array.Empty<PortMatrixRow>();
+        protected DateTimeOffset PortMatrixLastCacheTime = DateTimeOffset.MinValue;
+        protected readonly TimeSpan PortMatrixCacheTime = new TimeSpan(6, 0, 0);                
+        
+        protected Country[] DepartureCountries = Array.Empty<Country>();
+        protected DateTimeOffset DepartureCountriesLastCacheTime = DateTimeOffset.MinValue;
+        protected readonly TimeSpan DepartureCountriesCacheTime = new TimeSpan(6, 0, 0);           
+        
+        protected BestDealsCity[] CitiesForBestDeals = Array.Empty<BestDealsCity>();
+        protected DateTimeOffset CitiesForBestDealsLastCacheTime = DateTimeOffset.MinValue;
+        protected readonly TimeSpan CitiesForBestDealsCacheTime = new TimeSpan(2, 0, 0);        
 
         /// <summary>
         /// Creates a new instance of the <see cref="T:Pegasustan.PegasusClient" /> class.
@@ -97,14 +144,14 @@ namespace Pegasustan
         
         /// <summary>
         /// Initializes the <see cref="T:Pegasustan.PegasusClient" /> asynchronously.
-        /// <remarks>The available API result languages and currencies are fetched and saved in the <c>Languages</c> and <c>Currencies</c> properties.</remarks>
+        /// <remarks>The available API result languages and currencies are cached.</remarks>
         /// </summary>
         protected async Task InitializeAsync()
         {
-            Languages = await GetLanguagesAsync();
+            await GetLanguagesAsync();
             ChangeLanguage(DefaultLanguageCode);
 
-            Currencies = await GetCurrenciesAsync();
+            await GetCurrenciesAsync();
         }
 
         /// <summary>
@@ -141,6 +188,16 @@ namespace Pegasustan
         /// <returns>An array of available API response languages.</returns>
         public async Task<Language[]> GetLanguagesAsync()
         {
+            if (Languages.Length != 0)
+            {
+                switch (Caching)
+                {
+                    case CachingMode.Forced:
+                    case CachingMode.Smart when DateTimeOffset.UtcNow.Subtract(LanguagesLastCacheTime).Ticks < LanguagesCacheTime.Ticks:
+                        return Languages;
+                }
+            }
+
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{LanguagesEndpoint}");
             PrepareWebApiRequest(request);
             
@@ -149,12 +206,30 @@ namespace Pegasustan
             using (var stream = await response.Content.ReadAsStreamAsync())
             {
                 var content = await JsonSerializer.DeserializeAsync<JsonObject>(stream);
-                return ParseLanguages(content);
+                var languages = ParseLanguages(content);
+
+                Languages = Caching != CachingMode.None ? languages : Array.Empty<Language>();
+                LanguagesLastCacheTime = Caching != CachingMode.None ? DateTimeOffset.UtcNow : DateTimeOffset.MinValue;
+                return languages;
             }
         }
         
+        /// <summary>
+        /// Fetches available API response currencies.
+        /// </summary>
+        /// <returns>An array of available API response currencies.</returns>
         public async Task<Currency[]> GetCurrenciesAsync()
         {
+            if (Currencies.Length != 0)
+            {
+                switch (Caching)
+                {
+                    case CachingMode.Forced:
+                    case CachingMode.Smart when DateTimeOffset.UtcNow.Subtract(CurrenciesLastCacheTime).Ticks < CurrenciesCacheTime.Ticks:
+                        return Currencies;
+                }
+            }
+            
             var fareRequest = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{FareCurrenciesEndpoint}");
             PrepareWebApiRequest(fareRequest);
             
@@ -176,7 +251,11 @@ namespace Pegasustan
             using (var stream = await response.Content.ReadAsStreamAsync())
             {
                 var content = await JsonSerializer.DeserializeAsync<JsonObject>(stream);
-                return ParseCurrencies(content, fareSupportingCurrencies);
+                var currencies = ParseCurrencies(content, fareSupportingCurrencies);
+                
+                Currencies = Caching != CachingMode.None ? currencies : Array.Empty<Currency>();
+                CurrenciesLastCacheTime = Caching != CachingMode.None ? DateTimeOffset.UtcNow : DateTimeOffset.MinValue;
+                return currencies;
             }
         }
         
@@ -184,10 +263,21 @@ namespace Pegasustan
         /// Fetches airport matrix aka destination list.
         /// <remarks>This request can download a lot of data (a few megabytes). Be careful!</remarks>
         /// </summary>
-        /// <param name="lastUpdatedTimestamp">The timestamp when the port matrix was last updated (default - 0 - assures the latest data).</param>
+        /// <param name="lastUpdatedTimestamp">The timestamp when the port matrix was last updated (default - 0 - assures the latest data).
+        /// This parameter is not guaranteed to work properly. Even if you pass a fresh timestamp, the response will be the whole matrix.</param>
         /// <returns>An array of port matrix rows.</returns>
         public async Task<PortMatrixRow[]> GetPortMatrixAsync(long lastUpdatedTimestamp = 0L)
         {
+            if (PortMatrix.Length != 0)
+            {
+                switch (Caching)
+                {
+                    case CachingMode.Forced:
+                    case CachingMode.Smart when DateTimeOffset.UtcNow.Subtract(PortMatrixLastCacheTime).Ticks < PortMatrixCacheTime.Ticks:
+                        return PortMatrix;
+                }
+            }
+            
             var queryParams = await ParamsToStringAsync(new Dictionary<string, string> { { "lastUpdatedTimestamp", lastUpdatedTimestamp.ToString() } });
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{PortMatrixEndpoint}?{queryParams}");
             PrepareWebApiRequest(request);
@@ -197,7 +287,11 @@ namespace Pegasustan
             using (var stream = await response.Content.ReadAsStreamAsync())
             {
                 var content = await JsonSerializer.DeserializeAsync<JsonObject>(stream);
-                return ParsePortMatrix(content);
+                var portMatrix = ParsePortMatrix(content);
+                
+                PortMatrix = Caching != CachingMode.None ? portMatrix : Array.Empty<PortMatrixRow>();
+                PortMatrixLastCacheTime = Caching != CachingMode.None ? DateTimeOffset.UtcNow : DateTimeOffset.MinValue;
+                return portMatrix;
             }
         }
 
@@ -207,13 +301,27 @@ namespace Pegasustan
         /// <returns>An array of departure countries.</returns>
         public async Task<Country[]> GetDepartureCountriesAsync()
         {
+            if (DepartureCountries.Length != 0)
+            {
+                switch (Caching)
+                {
+                    case CachingMode.Forced:
+                    case CachingMode.Smart when DateTimeOffset.UtcNow.Subtract(DepartureCountriesLastCacheTime).Ticks < DepartureCountriesCacheTime.Ticks:
+                        return DepartureCountries;
+                }
+            }
+            
             var langCode = DefaultLanguage.Code.ToLower();
             var response = await Client.GetAsync($"{BaseApiAddress}{DepartureCountryPortsEndpoint}/{langCode}");
             
             using (var jsonStream = await response.Content.ReadAsStreamAsync())
             {
                 var content = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
-                return ParseCountries(content);
+                var countries = ParseCountries(content);
+
+                DepartureCountries = Caching != CachingMode.None ? countries : Array.Empty<Country>();
+                DepartureCountriesLastCacheTime = Caching != CachingMode.None ? DateTimeOffset.UtcNow : DateTimeOffset.MinValue;
+                return countries;
             }
         }
         
@@ -278,6 +386,16 @@ namespace Pegasustan
         /// <returns>An array of cities.</returns>
         public async Task<BestDealsCity[]> GetCitiesForBestDealsAsync()
         {
+            if (CitiesForBestDeals.Length != 0)
+            {
+                switch (Caching)
+                {
+                    case CachingMode.Forced:
+                    case CachingMode.Smart when DateTimeOffset.UtcNow.Subtract(CitiesForBestDealsLastCacheTime).Ticks < CitiesForBestDealsCacheTime.Ticks:
+                        return CitiesForBestDeals;
+                }
+            }
+            
             var langCode = DefaultLanguage.Code.ToLower();
             var queryParams = await ParamsToStringAsync(new Dictionary<string, string> { { "language", langCode } });
             var response = await Client.GetAsync($"{BaseApiAddress}{CitiesForBestDealsEndpoint}?{queryParams}");
@@ -285,7 +403,11 @@ namespace Pegasustan
             using (var jsonStream = await response.Content.ReadAsStreamAsync())
             {
                 var content = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
-                return ParseBestDealsCities(content);
+                var cities = ParseBestDealsCities(content);
+
+                CitiesForBestDeals = Caching != CachingMode.None ? cities : Array.Empty<BestDealsCity>();
+                CitiesForBestDealsLastCacheTime = Caching != CachingMode.None ? DateTimeOffset.UtcNow : DateTimeOffset.MinValue;
+                return cities;
             }
         }
         
