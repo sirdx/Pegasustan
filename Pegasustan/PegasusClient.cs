@@ -56,6 +56,7 @@ namespace Pegasustan
         protected const string FareCurrenciesEndpoint = "cheapest-fare/currency-codes";
 
         // JSON nodes
+        protected const string ApiSuccessNode = "isSuccess";
         protected const string LanguagesNode = "languageList";
         protected const string CountriesNode = "list";
         protected const string FaresMonthsNode = "cheapFareFlightCalenderModelList"; // Yes, there is a typo in the API
@@ -308,6 +309,7 @@ namespace Pegasustan
         /// Fetches departure countries.
         /// </summary>
         /// <returns>An array of departure countries.</returns>
+        /// <exception cref="T:Pegasustan.Utils.PegasusException">The request was not successful.</exception>
         public async Task<Country[]> GetDepartureCountriesAsync()
         {
             if (DepartureCountries.Length != 0)
@@ -326,6 +328,7 @@ namespace Pegasustan
             using (var jsonStream = await response.Content.ReadAsStreamAsync())
             {
                 var content = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
+                AssertApiSuccess(content);
                 var countries = ParseCountries(content);
 
                 DepartureCountries = Caching != CachingMode.None ? countries : Array.Empty<Country>();
@@ -339,6 +342,7 @@ namespace Pegasustan
         /// </summary>
         /// <param name="departurePort">The port from which the flight begins.</param>
         /// <returns>An array of possible arrival countries.</returns>
+        /// <exception cref="T:Pegasustan.Utils.PegasusException">The request was not successful.</exception>
         public async Task<Country[]> GetArrivalCountriesAsync(Port departurePort)
         {
             var langCode = DefaultLanguage.Code.ToLower();
@@ -347,6 +351,7 @@ namespace Pegasustan
             using (var jsonStream = await response.Content.ReadAsStreamAsync())
             {
                 var content = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
+                AssertApiSuccess(content);
                 return ParseCountries(content);
             }
         }
@@ -360,6 +365,7 @@ namespace Pegasustan
         /// <param name="currency">The currency in which the fares should be presented (only the ones that support cheapest-fare requests).</param>
         /// <returns>An array of fares months.</returns>
         /// <exception cref="ArgumentException">Passed currency does not support cheapest-fare requests.</exception>
+        /// <exception cref="T:Pegasustan.Utils.PegasusException">The request was not successful.</exception>
         public async Task<FaresMonth[]> GetFaresMonthsAsync(Port departurePort, Port arrivalPort, DateTime flightDate, Currency currency)
         {
             if (!currency.SupportsCheapestFare)
@@ -385,6 +391,7 @@ namespace Pegasustan
             using (var jsonStream = await response.Content.ReadAsStreamAsync())
             {
                 var responseContent = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
+                AssertApiSuccess(responseContent);
                 return ParseFaresMonths(responseContent, departurePort, arrivalPort, currency);
             }
         }
@@ -393,6 +400,7 @@ namespace Pegasustan
         /// Fetches cities for best-deals.
         /// </summary>
         /// <returns>An array of cities.</returns>
+        /// <exception cref="T:Pegasustan.Utils.PegasusException">The request was not successful.</exception>
         public async Task<BestDealsCity[]> GetCitiesForBestDealsAsync()
         {
             if (CitiesForBestDeals.Length != 0)
@@ -412,6 +420,7 @@ namespace Pegasustan
             using (var jsonStream = await response.Content.ReadAsStreamAsync())
             {
                 var content = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
+                AssertApiSuccess(content);
                 var cities = ParseBestDealsCities(content);
 
                 CitiesForBestDeals = Caching != CachingMode.None ? cities : Array.Empty<BestDealsCity>();
@@ -428,6 +437,7 @@ namespace Pegasustan
         /// <param name="currency">The currency in which the fares should be presented.</param>
         /// <param name="page">The page of deals (each contains at most 10 elements, set to 0 by default).</param>
         /// <returns>An array of best deals.</returns>
+        /// <exception cref="T:Pegasustan.Utils.PegasusException">The request was not successful.</exception>
         public async Task<BestDeal[]> GetBestDealsAsync(BestDealsCity departureCity, Currency currency, uint page = 0U)
         {
             var payload = new
@@ -451,7 +461,23 @@ namespace Pegasustan
             using (var jsonStream = await response.Content.ReadAsStreamAsync())
             {
                 var responseContent = await JsonSerializer.DeserializeAsync<JsonObject>(jsonStream);
+                AssertApiSuccess(responseContent);
                 return ParseBestDeals(responseContent, departureCity, currency);
+            }
+        }
+
+        protected static void AssertApiSuccess(JsonObject content)
+        {
+            if (content.TryGetPropertyValue(ApiSuccessNode, out var isSuccess))
+            {
+                if (!(bool)isSuccess)
+                {
+                    throw new PegasusException("The request was not successful.");
+                }
+            }
+            else
+            {
+                throw new PegasusException("The request was not successful.");
             }
         }
 
