@@ -71,19 +71,47 @@ namespace Pegasustan
         {
             AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.None
         });
+        
+        /// <summary>
+        /// The cached API response languages. 
+        /// </summary>
+        protected Language[] Languages = Array.Empty<Language>();
+        protected DateTimeOffset LanguagesLastCacheTime = DateTimeOffset.MinValue;
+        protected readonly TimeSpan LanguagesCacheTime = new TimeSpan(12, 0, 0); 
+        
+        /// <summary>
+        /// The cached API response currencies. 
+        /// </summary>
+        protected Currency[] Currencies = Array.Empty<Currency>();
+        protected DateTimeOffset CurrenciesLastCacheTime = DateTimeOffset.MinValue;
+        protected readonly TimeSpan CurrenciesCacheTime = new TimeSpan(0, 30, 0); 
+        
+        /// <summary>
+        /// The cached port matrix. 
+        /// </summary>
+        protected PortMatrixRow[] PortMatrix = Array.Empty<PortMatrixRow>();
+        protected DateTimeOffset PortMatrixLastCacheTime = DateTimeOffset.MinValue;
+        protected readonly TimeSpan PortMatrixCacheTime = new TimeSpan(6, 0, 0);                
+        
+        /// <summary>
+        /// The cached departure countries. 
+        /// </summary>
+        protected Country[] DepartureCountries = Array.Empty<Country>();
+        protected DateTimeOffset DepartureCountriesLastCacheTime = DateTimeOffset.MinValue;
+        protected readonly TimeSpan DepartureCountriesCacheTime = new TimeSpan(6, 0, 0);           
+        
+        /// <summary>
+        /// The cached cities for best-deals. 
+        /// </summary>
+        protected BestDealsCity[] CitiesForBestDeals = Array.Empty<BestDealsCity>();
+        protected DateTimeOffset CitiesForBestDealsLastCacheTime = DateTimeOffset.MinValue;
+        protected readonly TimeSpan CitiesForBestDealsCacheTime = new TimeSpan(2, 0, 0);        
 
         /// <summary>
         /// The API response caching mode (for some of the requests that can or should be cached).
         /// <remarks><c>Smart</c> mode should be enough for most of the users, so it is set by default.</remarks>
         /// </summary>
         public CachingMode Caching { get; set; } = CachingMode.Smart;
-
-        /// <summary>
-        /// The available API response languages. 
-        /// </summary>
-        protected Language[] Languages = Array.Empty<Language>();
-        protected DateTimeOffset LanguagesLastCacheTime = DateTimeOffset.MinValue;
-        protected readonly TimeSpan LanguagesCacheTime = new TimeSpan(12, 0, 0); 
         
         /// <summary>
         /// The default API response language.
@@ -91,25 +119,6 @@ namespace Pegasustan
         /// </summary>
         public Language DefaultLanguage { get; set; }
         
-        /// <summary>
-        /// The available API response currencies. 
-        /// </summary>
-        protected Currency[] Currencies = Array.Empty<Currency>();
-        protected DateTimeOffset CurrenciesLastCacheTime = DateTimeOffset.MinValue;
-        protected readonly TimeSpan CurrenciesCacheTime = new TimeSpan(0, 30, 0); 
-        
-        protected PortMatrixRow[] PortMatrix = Array.Empty<PortMatrixRow>();
-        protected DateTimeOffset PortMatrixLastCacheTime = DateTimeOffset.MinValue;
-        protected readonly TimeSpan PortMatrixCacheTime = new TimeSpan(6, 0, 0);                
-        
-        protected Country[] DepartureCountries = Array.Empty<Country>();
-        protected DateTimeOffset DepartureCountriesLastCacheTime = DateTimeOffset.MinValue;
-        protected readonly TimeSpan DepartureCountriesCacheTime = new TimeSpan(6, 0, 0);           
-        
-        protected BestDealsCity[] CitiesForBestDeals = Array.Empty<BestDealsCity>();
-        protected DateTimeOffset CitiesForBestDealsLastCacheTime = DateTimeOffset.MinValue;
-        protected readonly TimeSpan CitiesForBestDealsCacheTime = new TimeSpan(2, 0, 0);        
-
         /// <summary>
         /// Creates a new instance of the <see cref="T:Pegasustan.PegasusClient" /> class.
         /// </summary>
@@ -381,7 +390,7 @@ namespace Pegasustan
         }
 
         /// <summary>
-        /// Fetches cities for best deals.
+        /// Fetches cities for best-deals.
         /// </summary>
         /// <returns>An array of cities.</returns>
         public async Task<BestDealsCity[]> GetCitiesForBestDealsAsync()
