@@ -8,7 +8,7 @@ namespace Pegasustan.Tests.Domain;
 public sealed class LanguageTest
 {
     [Test]
-    public void ParseJsonLanguage()
+    public void Parse_WhenValidJsonNode_ReturnsValidLanguage()
     {
         const string testJson =
         """
@@ -23,7 +23,7 @@ public sealed class LanguageTest
         var jsonObject = JsonSerializer.Deserialize<JsonObject>(testJson);
         var langNode = jsonObject["lang"];
         var language = Language.Parse(langNode);
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(language.Code, Is.EqualTo("PG"));
@@ -32,7 +32,7 @@ public sealed class LanguageTest
     }
 
     [Test]
-    public void FailParsingInvalidJsonLanguage()
+    public void Parse_WhenInvalidJsonNode_ThrowsException()
     {
         const string testJson =
             """
