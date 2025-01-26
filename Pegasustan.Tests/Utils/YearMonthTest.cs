@@ -6,19 +6,19 @@ namespace Pegasustan.Tests.Utils;
 public sealed class YearMonthTest
 {
     [Test]
-    public void ParseText()
+    public void Parse_WhenValidFormat_ReturnsValidYearMonth()
     {
         var yearMonth = YearMonth.Parse("2024-07");
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(yearMonth.Year, Is.EqualTo(2024));
             Assert.That(yearMonth.Month, Is.EqualTo(7));
         });
     }
-    
+
     [Test]
-    public void FailParsingInvalidText()
+    public void Parse_WhenInvalidFormat_ThrowsException()
     {
         Assert.Multiple(() =>
         {
