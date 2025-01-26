@@ -17,15 +17,12 @@ public sealed class YearMonthTest
         });
     }
 
-    [Test]
-    public void Parse_WhenInvalidFormat_ThrowsException()
+    [TestCase("")]
+    [TestCase("-")]
+    [TestCase("2024-13")]
+    [TestCase("0000000")]
+    public void Parse_WhenInvalidFormat_ThrowsException(string input)
     {
-        Assert.Multiple(() =>
-        {
-            Assert.Throws<ArgumentException>(() => YearMonth.Parse(""));
-            Assert.Throws<ArgumentException>(() => YearMonth.Parse("-"));
-            Assert.Throws<ArgumentException>(() => YearMonth.Parse("2024-13"));
-            Assert.Throws<ArgumentException>(() => YearMonth.Parse("0000000"));
-        });
+        Assert.Throws<ArgumentException>(() => YearMonth.Parse(input));
     }
 }
