@@ -25,4 +25,16 @@ public sealed class YearMonthTest
     {
         Assert.Throws<ArgumentException>(() => YearMonth.Parse(input));
     }
+
+    [Test]
+    public void ToYearMonth_WhenValidDateTime_ReturnsValidYearMonth()
+    {
+        var yearMonth = new DateTime(2023, 12, 31).ToYearMonth();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(yearMonth.Year, Is.EqualTo(2023));
+            Assert.That(yearMonth.Month, Is.EqualTo(12));
+        });
+    }
 }
