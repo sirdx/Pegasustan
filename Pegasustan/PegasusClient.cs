@@ -13,9 +13,9 @@ using Pegasustan.Utils;
 namespace Pegasustan
 {
     /// <summary>
-    /// Provides a class for sending and receiving unofficial Pegasus API requests and responses.
+    /// Provides an implementation of <see cref="T:Pegasustan.IPegasusClient"/> for sending and receiving unofficial Pegasus API requests and responses.
     /// </summary>
-    public class PegasusClient
+    public class PegasusClient : IPegasusClient
     {
         /// <summary>
         /// Represents the response caching mode used throughout the <see cref="T:Pegasustan.PegasusClient"/> while sending requests to the API.
@@ -114,10 +114,7 @@ namespace Pegasustan
         /// </summary>
         public CachingMode Caching { get; set; } = CachingMode.Smart;
         
-        /// <summary>
-        /// The default API response language.
-        /// <remarks>It should be initialized by default to English.</remarks>
-        /// </summary>
+        /// <inheritdoc/>
         public Language DefaultLanguage { get; set; }
         
         /// <summary>
@@ -163,20 +160,14 @@ namespace Pegasustan
 
             await GetCurrenciesAsync();
         }
-
-        /// <summary>
-        /// Changes the API response language.
-        /// </summary>
-        /// <param name="code">The language code.</param>
+        
+        /// <inheritdoc/>
         public void ChangeLanguage(string code)
         {
             DefaultLanguage = Languages.FindByCode(code);
         }
         
-        /// <summary>
-        /// Fetches API status.
-        /// </summary>
-        /// <returns>Boolean representing the service availability.</returns>
+        /// <inheritdoc/>
         public async Task<bool> GetStatusAsync()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseWebApiAddress}{StatusEndpoint}");
@@ -192,10 +183,7 @@ namespace Pegasustan
             }
         }
 
-        /// <summary>
-        /// Fetches available API response languages.
-        /// </summary>
-        /// <returns>An array of available API response languages.</returns>
+        /// <inheritdoc/>
         public async Task<Language[]> GetLanguagesAsync()
         {
             if (Languages.Length != 0)
@@ -224,10 +212,7 @@ namespace Pegasustan
             }
         }
         
-        /// <summary>
-        /// Fetches available API response currencies.
-        /// </summary>
-        /// <returns>An array of available API response currencies.</returns>
+        /// <inheritdoc/>
         public async Task<Currency[]> GetCurrenciesAsync()
         {
             if (Currencies.Length != 0)
@@ -269,13 +254,7 @@ namespace Pegasustan
             }
         }
         
-        /// <summary>
-        /// Fetches airport matrix aka destination list.
-        /// <remarks>This request can download a lot of data (a few megabytes). Be careful!</remarks>
-        /// </summary>
-        /// <param name="lastUpdatedTimestamp">The timestamp when the port matrix was last updated (default - 0 - assures the latest data).
-        /// This parameter is not guaranteed to work properly. Even if you pass a fresh timestamp, the response will be the whole matrix.</param>
-        /// <returns>An array of port matrix rows.</returns>
+        /// <inheritdoc/>
         public async Task<PortMatrixRow[]> GetPortMatrixAsync(long lastUpdatedTimestamp = 0L)
         {
             if (PortMatrix.Length != 0)
@@ -305,11 +284,7 @@ namespace Pegasustan
             }
         }
 
-        /// <summary>
-        /// Fetches departure countries.
-        /// </summary>
-        /// <returns>An array of departure countries.</returns>
-        /// <exception cref="T:Pegasustan.Utils.PegasusException">The request was not successful.</exception>
+        /// <inheritdoc/>
         public async Task<Country[]> GetDepartureCountriesAsync()
         {
             if (DepartureCountries.Length != 0)
@@ -337,12 +312,7 @@ namespace Pegasustan
             }
         }
         
-        /// <summary>
-        /// Fetches arrival countries based on the provided departure port.
-        /// </summary>
-        /// <param name="departurePort">The port from which the flight begins.</param>
-        /// <returns>An array of possible arrival countries.</returns>
-        /// <exception cref="T:Pegasustan.Utils.PegasusException">The request was not successful.</exception>
+        /// <inheritdoc/>
         public async Task<Country[]> GetArrivalCountriesAsync(Port departurePort)
         {
             var langCode = DefaultLanguage.Code.ToLower();
@@ -356,16 +326,7 @@ namespace Pegasustan
             }
         }
         
-        /// <summary>
-        /// Fetches fares months for the given route and currency.
-        /// </summary>
-        /// <param name="departurePort">The port from which the flight begins.</param>
-        /// <param name="arrivalPort">The port at which the flight ends.</param>
-        /// <param name="flightDate">The UTC based date from which the fares months should be counted.</param>
-        /// <param name="currency">The currency in which the fares should be presented (only the ones that support cheapest-fare requests).</param>
-        /// <returns>An array of fares months.</returns>
-        /// <exception cref="ArgumentException">Passed currency does not support cheapest-fare requests.</exception>
-        /// <exception cref="T:Pegasustan.Utils.PegasusException">The request was not successful.</exception>
+        /// <inheritdoc/>
         public async Task<FaresMonth[]> GetFaresMonthsAsync(Port departurePort, Port arrivalPort, DateTime flightDate, Currency currency)
         {
             if (!currency.SupportsCheapestFare)
@@ -396,11 +357,7 @@ namespace Pegasustan
             }
         }
 
-        /// <summary>
-        /// Fetches cities for best-deals.
-        /// </summary>
-        /// <returns>An array of cities.</returns>
-        /// <exception cref="T:Pegasustan.Utils.PegasusException">The request was not successful.</exception>
+        /// <inheritdoc/>
         public async Task<BestDealsCity[]> GetCitiesForBestDealsAsync()
         {
             if (CitiesForBestDeals.Length != 0)
@@ -429,15 +386,7 @@ namespace Pegasustan
             }
         }
         
-        /// <summary>
-        /// Fetches best deals for the given city and currency.
-        /// <remarks>Supports pagination.</remarks>
-        /// </summary>
-        /// <param name="departureCity">The best-deals city from which the flights begin.</param>
-        /// <param name="currency">The currency in which the fares should be presented.</param>
-        /// <param name="page">The page of deals (each contains at most 10 elements, set to 0 by default).</param>
-        /// <returns>An array of best deals.</returns>
-        /// <exception cref="T:Pegasustan.Utils.PegasusException">The request was not successful.</exception>
+        /// <inheritdoc/>
         public async Task<BestDeal[]> GetBestDealsAsync(BestDealsCity departureCity, Currency currency, uint page = 0U)
         {
             var payload = new
