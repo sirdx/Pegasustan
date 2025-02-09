@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Pegasustan.Domain
@@ -45,12 +46,12 @@ namespace Pegasustan.Domain
         /// <exception cref="ArgumentException">Passed JSON node does not represent a valid currency data.</exception>
         public static Currency Parse(JsonNode node, IEnumerable<string> fareSupportingCurrencies)
         {
-            var code = (string)node.AsValue();
-
-            if (code is null)
+            if (node is null || node.GetValueKind() != JsonValueKind.String)
             {
                 throw new ArgumentException("JSON node does not provide proper currency data.");
             }
+            
+            var code = (string)node;
 
             if (string.Equals(code, "TL", StringComparison.OrdinalIgnoreCase))
             {

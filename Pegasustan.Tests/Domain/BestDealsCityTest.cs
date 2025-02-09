@@ -5,29 +5,26 @@ using Pegasustan.Domain;
 namespace Pegasustan.Tests.Domain;
 
 [TestFixture]
-public sealed class LanguageTest
+public sealed class BestDealsCityTest
 {
     [Test]
-    public void Parse_WhenValidJsonNode_ReturnsValidLanguage()
+    public void Parse_WhenValidJsonNode_ReturnsValidBestDealsCity()
     {
         const string testJson =
         """
         {
-            "lang": {
-                "code": "PG",
-                "name": "Pegasus"
-            }
+            "code": "BDC",
+            "title": "Best Deals City"
         }
         """;
 
         var jsonObject = JsonSerializer.Deserialize<JsonObject>(testJson);
-        var langNode = jsonObject["lang"];
-        var language = Language.Parse(langNode);
+        var city = BestDealsCity.Parse(jsonObject);
 
         Assert.Multiple(() =>
         {
-            Assert.That(language.Code, Is.EqualTo("PG"));
-            Assert.That(language.Name, Is.EqualTo("Pegasus"));
+            Assert.That(city.Code, Is.EqualTo("BDC"));
+            Assert.That(city.Title, Is.EqualTo("Best Deals City"));
         });
     }
 
@@ -37,14 +34,11 @@ public sealed class LanguageTest
         const string testJson =
             """
             {
-                "lang": {
-                    "code": "PG"
-                }
+                "code": "BDC"
             }
             """;
 
         var jsonObject = JsonSerializer.Deserialize<JsonObject>(testJson);
-        var langNode = jsonObject["lang"];
-        Assert.Throws<ArgumentException>(() => Language.Parse(langNode));
+        Assert.Throws<ArgumentException>(() => BestDealsCity.Parse(jsonObject));
     }
 }
