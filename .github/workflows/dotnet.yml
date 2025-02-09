@@ -32,7 +32,7 @@ jobs:
       with:
         label: Test Coverage
         color: brightgreen
-        path: Pegasustan.Tests/TestResults/coverage.opencover.xml
+        path: ./Pegasustan.Tests/TestResults/coverage.opencover.xml
         gist-filename: code-coverage.json
         gist-id: c5863732428307b2ae506253d409f5d7
         gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}   
