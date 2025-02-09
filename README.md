@@ -1,5 +1,5 @@
 # <img alt="✈️" src="./Pegasustan/icon.png" width="28"/> Pegasustan
-[![dotnet](https://img.shields.io/badge/-.NET%20Standard%202.0-5C2D91?style=for-the-badge)](https://dotnet.microsoft.com/) [![latest version](https://img.shields.io/nuget/v/Pegasustan?style=for-the-badge)](https://www.nuget.org/packages/Pegasustan) [![downloads](https://img.shields.io/nuget/dt/Pegasustan?style=for-the-badge)](https://www.nuget.org/packages/Pegasustan)
+[![dotnet](https://img.shields.io/badge/-.NET%20Standard%202.0-5C2D91?style=for-the-badge)](https://dotnet.microsoft.com/) ![coverage](https://img.shields.io/endpoint?style=for-the-badge&url=https://gist.githubusercontent.com/sirdx/c5863732428307b2ae506253d409f5d7/raw/code-coverage.json) [![latest version](https://img.shields.io/nuget/v/Pegasustan?style=for-the-badge)](https://www.nuget.org/packages/Pegasustan) [![downloads](https://img.shields.io/nuget/dt/Pegasustan?style=for-the-badge)](https://www.nuget.org/packages/Pegasustan)
 
 [Pegasus](https://www.flypgs.com/) Unofficial API client written in .NET Standard 2.0.
 
