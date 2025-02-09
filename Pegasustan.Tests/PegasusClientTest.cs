@@ -17,11 +17,11 @@ public sealed class PegasusClientTest
     public void GetLanguagesAsync_WhenCalled_ReturnsNonEmptyArray()
     {
         var languages = Array.Empty<Language>();
-        Assert.DoesNotThrowAsync(async () =>
+        Assert.Multiple(() =>
         {
-            languages = await _pegasusClient.GetLanguagesAsync();
+            Assert.DoesNotThrowAsync(async () => { languages = await _pegasusClient.GetLanguagesAsync(); });
+            Assert.That(languages, Is.Not.Empty);
         });
-        Assert.That(languages, Is.Not.Empty);
     }
 
     [Test]
@@ -48,11 +48,11 @@ public sealed class PegasusClientTest
     public void GetDepartureCountriesAsync_WhenCalled_ReturnsNonEmptyArray()
     {
         var countries = Array.Empty<Country>();
-        Assert.DoesNotThrowAsync(async () =>
+        Assert.Multiple(() =>
         {
-            countries = await _pegasusClient.GetDepartureCountriesAsync();
+            Assert.DoesNotThrowAsync(async () => { countries = await _pegasusClient.GetDepartureCountriesAsync(); });
+            Assert.That(countries, Is.Not.Empty);
         });
-        Assert.That(countries, Is.Not.Empty);
     }    
 
     [Test]
@@ -61,16 +61,71 @@ public sealed class PegasusClientTest
         var countries = await _pegasusClient.GetDepartureCountriesAsync();
         Assert.DoesNotThrowAsync(async () => await _pegasusClient.GetArrivalCountriesAsync(countries.First().Ports.First()));
     }
+    
+    [Test]
+    public async Task GetFaresMonthsAsync_WhenCalledWithValidCurrency_ReturnsNonEmptyArray()
+    { 
+        var depCountries = await _pegasusClient.GetDepartureCountriesAsync();
+        var depPort = depCountries.First().Ports.First();
+        var arrCountries = await _pegasusClient.GetArrivalCountriesAsync(depPort);
+        var arrPort = arrCountries.First().Ports.First();
+        var currency = (await _pegasusClient.GetCurrenciesAsync()).First();
+        
+        var fares = Array.Empty<FaresMonth>();
+        Assert.Multiple(() =>
+        {
+            Assert.DoesNotThrowAsync(async () =>
+            {
+                fares = await _pegasusClient.GetFaresMonthsAsync(
+                    depPort,
+                    arrPort,
+                    DateTime.Today.ToUniversalTime(),
+                    currency);
+            });
+            Assert.That(fares, Is.Not.Empty);
+        });
+    }
+    
+    [Test]
+    public async Task GetFaresMonthsAsync_WhenCalledWithInvalidCurrency_ThrowsException()
+    { 
+        var depCountries = await _pegasusClient.GetDepartureCountriesAsync();
+        var depPort = depCountries.First().Ports.First();
+        var arrCountries = await _pegasusClient.GetArrivalCountriesAsync(depPort);
+        var arrPort = arrCountries.First().Ports.First();
+        var currency = (await _pegasusClient.GetCurrenciesAsync()).First(c => !c.SupportsCheapestFare);
+        
+        Assert.ThrowsAsync<ArgumentException>(async () => await _pegasusClient.GetFaresMonthsAsync(
+            depPort,
+            arrPort,
+            DateTime.Today.ToUniversalTime(),
+            currency)
+        );
+    }
+    
+    [Test]
+    public void GetPortMatrixAsync_WhenCalled_ReturnsNonEmptyArray()
+    {
+        var matrix = Array.Empty<PortMatrixRow>();
+        Assert.Multiple(() =>
+        {
+            Assert.DoesNotThrowAsync(async () =>
+            {
+                matrix = await _pegasusClient.GetPortMatrixAsync();
+            });
+            Assert.That(matrix, Is.Not.Empty);
+        });
+    }    
         
     [Test]
     public void GetCitiesForBestDealsAsync_WhenCalled_ReturnsNonEmptyArray()
     {
         var cities = Array.Empty<BestDealsCity>();
-        Assert.DoesNotThrowAsync(async () =>
+        Assert.Multiple(() =>
         {
-            cities = await _pegasusClient.GetCitiesForBestDealsAsync();
+            Assert.DoesNotThrowAsync(async () => { cities = await _pegasusClient.GetCitiesForBestDealsAsync(); });
+            Assert.That(cities, Is.Not.Empty);
         });
-        Assert.That(cities, Is.Not.Empty);
     }
     
     [Test]
@@ -78,12 +133,13 @@ public sealed class PegasusClientTest
     {
         var cities = await _pegasusClient.GetCitiesForBestDealsAsync();
         var deals = Array.Empty<BestDeal>();
-        Assert.DoesNotThrowAsync(async () =>
+        Assert.Multiple(() =>
         {
-            deals = await _pegasusClient.GetBestDealsAsync(cities.First(), Currency.Lira);
+            Assert.DoesNotThrowAsync(async () =>
+            {
+                deals = await _pegasusClient.GetBestDealsAsync(cities.First(), Currency.Lira);
+            });
+            Assert.That(deals, Is.Not.Empty);
         });
-        Assert.That(deals, Is.Not.Empty);
     }
-    
-    // TODO: More tests
 }

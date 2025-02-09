@@ -25,4 +25,14 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover --no-build --verbosity normal
+    - name: Create test coverage badge
+      uses: simon-k/dotnet-code-coverage-badge@v1.0.0
+      id: create_coverage_badge
+      with:
+        label: Test Coverage
+        color: brightgreen
+        path: ./Pegasustan.Tests/TestResults/coverage.opencover.xml
+        gist-filename: code-coverage.json
+        gist-id: c5863732428307b2ae506253d409f5d7
+        gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}   
