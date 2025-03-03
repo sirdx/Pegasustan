@@ -70,7 +70,7 @@ namespace Pegasustan.Domain
         {
             var flightMessage = node["availFlightMessage"];
                     
-            if (flightMessage != null && (string)flightMessage == "NO_FLIGHT")
+            if (flightMessage != null && (string)flightMessage == "NO_FARE")
             {
                 return NoFlight;
             }
