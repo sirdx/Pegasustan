@@ -45,7 +45,7 @@ try
     FaresMonth[] faresMonths = await client.GetFaresMonthsAsync(
         ankaraPort, 
         berlinPort, 
-        DateTime.Today.ToUniversalTime(), 
+        DateTime.UtcNow, 
         usd);
 }
 catch (PegasusException ex)
