@@ -1,4 +1,7 @@
 ﻿using Pegasustan.Domain;
+﻿using System.Text.Json.Nodes;
+using Moq;
+using Pegasustan.Domain;
 
 namespace Pegasustan.Tests;
 
@@ -6,6 +9,7 @@ namespace Pegasustan.Tests;
 public sealed class PegasusClientTest
 {
     private PegasusClient _pegasusClient;
+    private Mock<IPegasusClient> _mockPegasusClient;
     
     [SetUp]
     public async Task Setup()
@@ -58,18 +62,83 @@ public sealed class PegasusClientTest
     [Test]
     public async Task GetArrivalCountriesAsync_WhenCalled_DoesNotThrow()
     { 
-        var countries = await _pegasusClient.GetDepartureCountriesAsync();
+        _mockPegasusClient.Setup(client => client.GetDepartureCountriesAsync().Result).Returns([
+            Country.Parse(JsonNode.Parse("""
+                 {
+                     "countryName": "Türkiye",
+                     "countryCode": "TR",
+                     "sort": 1,
+                     "ports": [
+                         {
+                             "portName": "İzmir",
+                             "portCode": "ADB",
+                             "cityName": "Izmir",
+                             "keywords": ["35"],
+                             "domestic": true,
+                             "sort": 10000
+                         }
+                     ]
+                 }
+                 """)) 
+        ]);
+        
+        var countries = await _mockPegasusClient.Object.GetDepartureCountriesAsync();
         Assert.DoesNotThrowAsync(async () => await _pegasusClient.GetArrivalCountriesAsync(countries.First().Ports.First()));
     }
     
     [Test]
     public async Task GetFaresMonthsAsync_WhenCalledWithValidCurrency_ReturnsNonEmptyArray()
     { 
-        var depCountries = await _pegasusClient.GetDepartureCountriesAsync();
+        _mockPegasusClient.Setup(client => client.GetDepartureCountriesAsync().Result).Returns([
+            Country.Parse(JsonNode.Parse("""
+                 {
+                     "countryName": "Türkiye",
+                     "countryCode": "TR",
+                     "sort": 1,
+                     "ports": [
+                         {
+                             "portName": "İzmir",
+                             "portCode": "ADB",
+                             "cityName": "Izmir",
+                             "keywords": ["35"],
+                             "domestic": true,
+                             "sort": 10000
+                         }
+                     ]
+                 }
+                 """)) 
+        ]);
+        
+        var depCountries = await _mockPegasusClient.Object.GetDepartureCountriesAsync();
         var depPort = depCountries.First().Ports.First();
-        var arrCountries = await _pegasusClient.GetArrivalCountriesAsync(depPort);
+        
+        _mockPegasusClient.Setup(client => client.GetArrivalCountriesAsync(depPort).Result).Returns([
+            Country.Parse(JsonNode.Parse("""
+                 {
+                     "countryName": "Türkiye",
+                     "countryCode": "TR",
+                     "sort": 1,
+                     "ports": [
+                         {
+                             "portName": "Antalya",
+                             "portCode": "AYT",
+                             "cityName": "Antalya",
+                             "keywords": ["7"],
+                             "domestic": true,
+                             "sort": 10000
+                         }
+                     ]
+                 }
+                 """)) 
+        ]);
+        
+        var arrCountries = await _mockPegasusClient.Object.GetArrivalCountriesAsync(depPort);
         var arrPort = arrCountries.First().Ports.First();
-        var currency = (await _pegasusClient.GetCurrenciesAsync()).First();
+
+        _mockPegasusClient.Setup(client => client.GetCurrenciesAsync().Result).Returns([
+            Currency.Parse(JsonNode.Parse("\"TRY\""), ["TRY"])
+        ]);
+        var currency = (await _mockPegasusClient.Object.GetCurrenciesAsync()).First();
         
         var fares = Array.Empty<FaresMonth>();
         Assert.Multiple(() =>
@@ -79,7 +148,7 @@ public sealed class PegasusClientTest
                 fares = await _pegasusClient.GetFaresMonthsAsync(
                     depPort,
                     arrPort,
-                    DateTime.Today.ToUniversalTime(),
+                    DateTime.UtcNow,
                     currency);
             });
             Assert.That(fares, Is.Not.Empty);
@@ -89,16 +158,61 @@ public sealed class PegasusClientTest
     [Test]
     public async Task GetFaresMonthsAsync_WhenCalledWithInvalidCurrency_ThrowsException()
     { 
-        var depCountries = await _pegasusClient.GetDepartureCountriesAsync();
+        _mockPegasusClient.Setup(client => client.GetDepartureCountriesAsync().Result).Returns([
+            Country.Parse(JsonNode.Parse("""
+                 {
+                     "countryName": "Türkiye",
+                     "countryCode": "TR",
+                     "sort": 1,
+                     "ports": [
+                         {
+                             "portName": "İzmir",
+                             "portCode": "ADB",
+                             "cityName": "Izmir",
+                             "keywords": ["35"],
+                             "domestic": true,
+                             "sort": 10000
+                         }
+                     ]
+                 }
+                 """)) 
+        ]);
+        
+        var depCountries = await _mockPegasusClient.Object.GetDepartureCountriesAsync();
         var depPort = depCountries.First().Ports.First();
-        var arrCountries = await _pegasusClient.GetArrivalCountriesAsync(depPort);
+        
+        _mockPegasusClient.Setup(client => client.GetArrivalCountriesAsync(depPort).Result).Returns([
+            Country.Parse(JsonNode.Parse("""
+                 {
+                     "countryName": "Türkiye",
+                     "countryCode": "TR",
+                     "sort": 1,
+                     "ports": [
+                         {
+                             "portName": "Antalya",
+                             "portCode": "AYT",
+                             "cityName": "Antalya",
+                             "keywords": ["7"],
+                             "domestic": true,
+                             "sort": 10000
+                         }
+                     ]
+                 }
+                 """)) 
+        ]);
+        
+        var arrCountries = await _mockPegasusClient.Object.GetArrivalCountriesAsync(depPort);
         var arrPort = arrCountries.First().Ports.First();
-        var currency = (await _pegasusClient.GetCurrenciesAsync()).First(c => !c.SupportsCheapestFare);
+
+        _mockPegasusClient.Setup(client => client.GetCurrenciesAsync().Result).Returns([
+            Currency.Parse(JsonNode.Parse("\"TRY\""), [])
+        ]);
+        var currency = (await _mockPegasusClient.Object.GetCurrenciesAsync()).First();
         
         Assert.ThrowsAsync<ArgumentException>(async () => await _pegasusClient.GetFaresMonthsAsync(
             depPort,
             arrPort,
-            DateTime.Today.ToUniversalTime(),
+            DateTime.UtcNow,
             currency)
         );
     }
@@ -131,7 +245,16 @@ public sealed class PegasusClientTest
     [Test]
     public async Task GetBestDealsAsync_WhenCalled_ReturnsNonEmptyArray()
     {
-        var cities = await _pegasusClient.GetCitiesForBestDealsAsync();
+        _mockPegasusClient.Setup(client => client.GetCitiesForBestDealsAsync().Result).Returns([
+            BestDealsCity.Parse(JsonNode.Parse("""
+               {
+                   "code": "ESB",
+                   "title": "Ankara"
+               }
+               """))
+        ]);
+        
+        var cities = await _mockPegasusClient.Object.GetCitiesForBestDealsAsync();
         var deals = Array.Empty<BestDeal>();
         Assert.Multiple(() =>
         {
