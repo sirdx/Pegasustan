@@ -1,4 +1,3 @@
-﻿using Pegasustan.Domain;
 ﻿using System.Text.Json.Nodes;
 using Moq;
 using Pegasustan.Domain;
@@ -15,6 +14,7 @@ public sealed class PegasusClientTest
     public async Task Setup()
     {
         _pegasusClient = await PegasusClient.CreateAsync();
+        _mockPegasusClient = new Mock<IPegasusClient>();
     }
     
     [Test]
