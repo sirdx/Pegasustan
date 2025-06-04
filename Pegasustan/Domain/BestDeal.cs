@@ -40,7 +40,7 @@ namespace Pegasustan.Domain
         /// The flight date (the first date of <c>Dates</c>).
         /// <remarks>Date only - no time provided.</remarks>
         /// </summary>
-        public DateTime Date => Dates.First();
+        public DateTime? Date => Dates.FirstOrDefault();
         
         /// <summary>
         /// The flight dates that are considered best-deal (including the <c>Date</c> one).
@@ -51,7 +51,7 @@ namespace Pegasustan.Domain
         /// <summary>
         /// The year and the month.
         /// </summary>
-        public YearMonth YearMonth { get; }
+        public YearMonth YearMonth => Date?.ToYearMonth() ?? new YearMonth(0, 1);
         
         /// <summary>
         /// The image URL.
@@ -92,8 +92,6 @@ namespace Pegasustan.Domain
             Dates = dates;
             ImageUrl = imageUrl;
             Promotion = promotion;
-
-            YearMonth = Date.ToYearMonth();
         }
 
         /// <summary>

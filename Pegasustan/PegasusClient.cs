@@ -388,7 +388,7 @@ namespace Pegasustan
         }
         
         /// <inheritdoc/>
-        public async Task<BestDeal[]> GetBestDealsAsync(BestDealsCity departureCity, Currency currency, uint page = 0U)
+        public async Task<BestDeal[]> GetBestDealsAsync(BestDealsCity departureCity, Currency currency, uint page = 1U)
         {
             var payload = new
             {
