@@ -12,8 +12,8 @@
         <RepositoryUrl>https://github.com/sirdx/Pegasustan.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>pegasus api</PackageTags>
-        <PackageReleaseNotes>Added new endpoints and response caching, fixed some bugs.</PackageReleaseNotes>
-        <Version>1.1.0</Version>
+        <PackageReleaseNotes>Fixed some bugs.</PackageReleaseNotes>
+        <Version>1.1.1</Version>
     </PropertyGroup>
 
     <ItemGroup>
