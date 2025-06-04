@@ -32,6 +32,16 @@ namespace Pegasustan.Utils
         /// <param name="month">The month.</param>
         public YearMonth(int year, int month)
         {
+            if (year < 0 || year > 9999)
+            {
+                throw new ArgumentOutOfRangeException(nameof(year), "Year is out of range.");
+            }
+
+            if (month < 1 || month > 12)
+            {
+                throw new ArgumentOutOfRangeException(nameof(month), "Month is out of range.");
+            }
+            
             Year = year;
             Month = month;
         }
