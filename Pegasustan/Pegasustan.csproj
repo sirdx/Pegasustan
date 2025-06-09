@@ -5,13 +5,13 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>Pegasustan</Title>
         <Authors>sirdx</Authors>
-        <Description>Pegasus Unofficial API client written in .NET Standard 2.0.</Description>
+        <Description>Pegasus Airlines Unofficial API client written in .NET Standard 2.0.</Description>
         <PackageProjectUrl>https://github.com/sirdx/Pegasustan</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/sirdx/Pegasustan/blob/master/LICENSE.txt</PackageLicenseUrl>
         <PackageIcon>icon.png</PackageIcon>
         <RepositoryUrl>https://github.com/sirdx/Pegasustan.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageTags>pegasus api</PackageTags>
+        <PackageTags>pegasus airlines flypgs api</PackageTags>
         <PackageReleaseNotes>Fixed some bugs.</PackageReleaseNotes>
         <Version>1.1.1</Version>
     </PropertyGroup>

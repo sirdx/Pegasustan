@@ -1,9 +1,9 @@
 # <img alt="✈️" src="./Pegasustan/icon.png" width="28"/> Pegasustan
 [![dotnet](https://img.shields.io/badge/-.NET%20Standard%202.0-5C2D91?style=for-the-badge)](https://dotnet.microsoft.com/) ![coverage](https://img.shields.io/endpoint?style=for-the-badge&url=https://gist.githubusercontent.com/sirdx/c5863732428307b2ae506253d409f5d7/raw/code-coverage.json) [![latest version](https://img.shields.io/nuget/v/Pegasustan?style=for-the-badge)](https://www.nuget.org/packages/Pegasustan) [![downloads](https://img.shields.io/nuget/dt/Pegasustan?style=for-the-badge)](https://www.nuget.org/packages/Pegasustan)
 
-[Pegasus](https://www.flypgs.com/) Unofficial API client written in .NET Standard 2.0.
+[Pegasus Airlines](https://www.flypgs.com/) Unofficial API client written in .NET Standard 2.0.
 
-It provides a simple way to fetch ticket fares for a specified route. More functionality perhaps will be added later.
+It provides a simple way to fetch the airport matrix, the best deals, and ticket fares for a specified route. More functionality perhaps will be added later.
 
 > [!Warning]
 > This project is not (and will not be) related to [Pegasus NDC API](https://devportal.flypgs.com/).
@@ -61,7 +61,7 @@ The following code demonstrates how to change the API response language.
 client.ChangeLanguage("tr");
 ```
 
-Currently, there are 8 available languages (according to [Pegasus](https://www.flypgs.com/) website):
+Currently, there are 8 available languages (according to [Pegasus Airlines](https://www.flypgs.com/) website):
 - en (English, default)
 - tr (Turkish)
 - de (German)
