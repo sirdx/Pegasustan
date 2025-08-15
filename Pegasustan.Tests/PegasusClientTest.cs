@@ -75,6 +75,7 @@ public sealed class PegasusClientTest
                              "cityName": "Izmir",
                              "keywords": ["35"],
                              "domestic": true,
+                             "isDirectFlight": false,
                              "sort": 10000
                          }
                      ]
@@ -102,6 +103,7 @@ public sealed class PegasusClientTest
                              "cityName": "Izmir",
                              "keywords": ["35"],
                              "domestic": true,
+                             "isDirectFlight": false,
                              "sort": 10000
                          }
                      ]
@@ -125,6 +127,7 @@ public sealed class PegasusClientTest
                              "cityName": "Antalya",
                              "keywords": ["7"],
                              "domestic": true,
+                             "isDirectFlight": false,
                              "sort": 10000
                          }
                      ]
@@ -171,6 +174,7 @@ public sealed class PegasusClientTest
                              "cityName": "Izmir",
                              "keywords": ["35"],
                              "domestic": true,
+                             "isDirectFlight": false,
                              "sort": 10000
                          }
                      ]
@@ -194,6 +198,7 @@ public sealed class PegasusClientTest
                              "cityName": "Antalya",
                              "keywords": ["7"],
                              "domestic": true,
+                             "isDirectFlight": false,
                              "sort": 10000
                          }
                      ]

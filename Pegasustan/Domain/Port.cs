@@ -36,6 +36,12 @@ namespace Pegasustan.Domain
         /// <remarks>Since Pegasus is a Turkish airline, only Turkish ports are marked as domestic.</remarks>
         /// </summary>
         public bool Domestic { get; }
+
+        /// <summary>
+        /// Does the port have a direct flight from the departure port.
+        /// <remarks>Only meaningful for arrival ports.</remarks>
+        /// </summary>
+        public bool IsDirectFlight { get; }
         
         /// <summary>
         /// The port keywords.
@@ -51,14 +57,16 @@ namespace Pegasustan.Domain
         /// <param name="code">The port code.</param>
         /// <param name="cityName">The port city name.</param>
         /// <param name="domestic">Is the port domestic.</param>
+        /// <param name="isDirectFlight">Does the port have a direct flight.</param>
         /// <param name="keywords">The port keywords.</param>
-        private Port(Country country, string name, string code, string cityName, bool domestic, string[] keywords)
+        private Port(Country country, string name, string code, string cityName, bool domestic, bool isDirectFlight, string[] keywords)
         {
             Country = country;
             Name = name;
             Code = code;
             CityName = cityName;
             Domestic = domestic;
+            IsDirectFlight = isDirectFlight;
             Keywords = keywords;
         }
 
@@ -75,6 +83,7 @@ namespace Pegasustan.Domain
             var code = (string)node["portCode"];
             var cityName = (string)node["cityName"];
             var domestic = (bool)node["domestic"];
+            var isDirectFlight = (bool)node["isDirectFlight"];
             
             if (name is null || code is null)
             {
@@ -89,7 +98,7 @@ namespace Pegasustan.Domain
             }
             
             var portKeywordsArr = portKeywords.GetValues<string>().ToArray();
-            return new Port(country, name, code, cityName, domestic, portKeywordsArr);
+            return new Port(country, name, code, cityName, domestic, isDirectFlight, portKeywordsArr);
         }
     }
 }
