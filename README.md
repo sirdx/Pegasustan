@@ -14,6 +14,12 @@ It provides a simple way to fetch the airport matrix, the best deals, and ticket
 ## Installation
 Pegasustan is available on [NuGet](https://www.nuget.org/packages/Pegasustan).
 
+Install package:
+
+```bash
+dotnet add package Pegasustan
+```
+
 ## Usage
 The following code demonstrates basic usage of Pegasustan.
 
