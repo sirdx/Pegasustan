@@ -11,6 +11,17 @@ It provides a simple way to fetch the airport matrix, the best deals, and ticket
 > [!Note]
 > This project is in no way affiliated with Pegasus Airlines. This is just a hobby project created for fun.
 
+### Feature list
+
+| Feature | Status | Feature | Status |
+| --- | :---: | --- | :---: |
+| **Airport Matrix** | ✅ Implemented | **Availability** (flight details) | ❌ Not implemented |
+| **Best Deals** | ✅ Implemented | **Announcements** | ❔ Not planned |
+| **Currencies** | ✅ Implemented | **Booking Management** | ❔ Not planned |
+| **Languages** | ✅ Implemented | **Online Check In** | ❔ Not planned |
+| **Ticket Fares** | ✅ Implemented | **Transactions** | ❔ Not planned |
+
+
 ## Installation
 Pegasustan is available on [NuGet](https://www.nuget.org/packages/Pegasustan).
 
