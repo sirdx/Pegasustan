@@ -16,10 +16,10 @@ It provides a simple way to fetch the airport matrix, the best deals, and ticket
 | Feature | Status | Feature | Status |
 | --- | :---: | --- | :---: |
 | **Airport Matrix** | ✅ Implemented | **Availability** (flight details) | ❌ Not implemented |
-| **Best Deals** | ✅ Implemented | **Announcements** | ❔ Not planned |
+| **Best Deals** | ⚠️ Broken (see [#18](https://github.com/sirdx/Pegasustan/issues/18)) | **Announcements** | ❔ Not planned |
 | **Currencies** | ✅ Implemented | **Booking Management** | ❔ Not planned |
 | **Languages** | ✅ Implemented | **Online Check In** | ❔ Not planned |
-| **Ticket Fares** | ✅ Implemented | **Transactions** | ❔ Not planned |
+| **Ticket Fares** | ⚠️ Broken (see [#18](https://github.com/sirdx/Pegasustan/issues/18)) | **Transactions** | ❔ Not planned |
 
 
 ## Installation
