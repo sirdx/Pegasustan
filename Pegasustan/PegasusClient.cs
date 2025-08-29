@@ -122,7 +122,7 @@ namespace Pegasustan
         /// </summary>
         protected PegasusClient()
         {
-            Client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0");
+            Client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:142.0) Gecko/20100101 Firefox/142.0");
             Client.DefaultRequestHeaders.TryAddWithoutValidation("X-Platform", "web");
             Client.DefaultRequestHeaders.TryAddWithoutValidation("X-Version", "1.66.0");
             Client.DefaultRequestHeaders.Accept.ParseAdd("*/*");
